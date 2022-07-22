@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import parse
 
-from .utils import _find_keys, natural_keys, product_dict
+from .utils import _find_keys, natural_keys, product_dict, update_keys_dict_with_kwargs
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ keys: {repr_keys}
 """
 
 
-class Finder:
+class FinderBase:
     def __init__(self, pattern, suffix=""):
 
         self.pattern = pattern
@@ -27,11 +27,19 @@ class Finder:
         self.parser = parse.compile(self.pattern)
         self._suffix = suffix
 
-    def create_name(self, **kwargs):
+    def create_name(self, keys=None, **keys_kwargs):
         """build path from keys"""
 
-        return self.pattern.format(**kwargs)
+        print(f"{keys=}")
+        print(f"{keys_kwargs=}")
 
+        keys = update_keys_dict_with_kwargs(keys, **keys_kwargs)
+        print(f"{keys=}")
+
+        return self.pattern.format(**keys)
+
+
+class Finder(FinderBase):
     def _create_condition_dict(self, **kwargs):
 
         # add wildcard for all undefinded keys
@@ -40,15 +48,17 @@ class Finder:
 
         return cond_dict
 
-    def find(self, _allow_empty=False, **kwargs):
+    def find(self, keys=None, *, _allow_empty=False, **keys_kwargs):
+
+        keys = update_keys_dict_with_kwargs(keys=None, **keys_kwargs)
 
         # wrap strings in list
-        for key, value in kwargs.items():
+        for key, value in keys.items():
             if isinstance(value, str):
-                kwargs[key] = [value]
+                keys[key] = [value]
 
         list_of_df = list()
-        for one_search_dict in product_dict(**kwargs):
+        for one_search_dict in product_dict(**keys):
 
             cond_dict = self._create_condition_dict(**one_search_dict)
             full_pattern = self.create_name(**cond_dict)
@@ -111,7 +121,8 @@ class Finder:
 class FileFinder:
     def __init__(self, path_pattern, file_pattern):
 
-        self.file = Finder(file_pattern)
+        # cannot search for files (only paths and full)
+        self.file = FinderBase(file_pattern)
         # ensure path_pattern ends with a /
         self.path = Finder(os.path.join(path_pattern, ""), suffix="*")
         self.full = Finder(os.path.join(*filter(None, (path_pattern, file_pattern))))
@@ -124,23 +135,23 @@ class FileFinder:
         self.path_pattern = self.path.pattern
         self._full_pattern = self.full.pattern
 
-    def create_path_name(self, **kwargs):
+    def create_path_name(self, keys=None, **keys_kwargs):
         # warnings.warn("'create_path_name' is deprecated, use 'path.name' instead")
-        return self.path.create_name(**kwargs)
+        return self.path.create_name(keys, **keys_kwargs)
 
-    def create_file_name(self, **kwargs):
+    def create_file_name(self, keys=None, **keys_kwargs):
         # warnings.warn("'create_file_name' is deprecated, use 'file.name' instead")
-        return self.file.create_name(**kwargs)
+        return self.file.create_name(keys, **keys_kwargs)
 
-    def create_full_name(self, **kwargs):
+    def create_full_name(self, keys=None, **keys_kwargs):
         # warnings.warn("'create_full_name' is deprecated, use 'full.name' instead")
-        return self.full.create_name(**kwargs)
+        return self.full.create_name(keys, **keys_kwargs)
 
-    def find_paths(self, _allow_empty=False, **kwargs):
-        return self.path.find(_allow_empty=_allow_empty, **kwargs)
+    def find_paths(self, keys=None, *, _allow_empty=False, **keys_kwargs):
+        return self.path.find(keys, _allow_empty=_allow_empty, **keys_kwargs)
 
-    def find_files(self, _allow_empty=False, **kwargs):
-        return self.full.find(_allow_empty=_allow_empty, **kwargs)
+    def find_files(self, keys=None, _allow_empty=False, **keys_kwargs):
+        return self.full.find(keys, _allow_empty=_allow_empty, **keys_kwargs)
 
     def __repr__(self):
 

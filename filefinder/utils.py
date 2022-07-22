@@ -59,3 +59,33 @@ def product_dict(**kwargs):
     vals = kwargs.values()
     for instance in itertools.product(*vals):
         yield dict(zip(keys, instance))
+
+
+def update_keys_dict_with_kwargs(keys=None, **keys_kwargs):
+    """
+
+    Example
+    -------
+
+    update_keys_dict_with_kwargs({"a": 1}, a=2)
+
+    >>> {'a': 2}
+
+    update_keys_dict_with_kwargs({"a": 1, "b":2}, b=3, c=5)
+
+    >>> {'a': 1, 'b': 3, 'c': 5}
+    """
+
+    if keys is None:
+        keys = {}
+
+    if not isinstance(keys, dict):
+        raise TypeError(f"'keys' must be a dict, got {type(keys)}")
+
+    # TODO: use new_keys = keys | keys_kwargs once we are py3.9+
+
+    # update is in-place, we need a copy
+    new_keys = keys.copy()
+    new_keys.update(keys_kwargs)
+
+    return new_keys

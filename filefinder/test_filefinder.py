@@ -36,6 +36,11 @@ def test_pattern_property():
 
     assert ff._full_pattern == path_pattern + file_pattern
 
+    assert ff.path.pattern == path_pattern
+    assert ff.file.pattern == file_pattern
+
+    assert ff.full.pattern == path_pattern + file_pattern
+
 
 def test_pattern_sep_added():
 
@@ -109,6 +114,38 @@ def test_create_name():
     assert result == "a/b/b_c"
 
 
+def test_create_name_dict():
+
+    path_pattern = "{a}/{b}"
+    file_pattern = "{b}_{c}"
+    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+
+    result = ff.create_path_name(dict(a="a", b="b"))
+    assert result == "a/b/"
+
+    result = ff.create_file_name(dict(b="b", c="c"))
+    assert result == "b_c"
+
+    result = ff.create_full_name(dict(a="a", b="b", c="c"))
+    assert result == "a/b/b_c"
+
+
+def test_create_name_kwargs_priority():
+
+    path_pattern = "{a}/{b}"
+    file_pattern = "{b}_{c}"
+    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+
+    result = ff.create_path_name(dict(a="XXX", b="b"), a="a")
+    assert result == "a/b/"
+
+    result = ff.create_file_name(dict(b="XXX", c="c"), b="b")
+    assert result == "b_c"
+
+    result = ff.create_full_name(dict(a="XXX", b="b"), a="a", c="c")
+    assert result == "a/b/b_c"
+
+
 def test_find_path_none_found(path):
 
     path_pattern = path / "{a}/"
@@ -131,11 +168,16 @@ def test_find_paths_simple(path):
 
     ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
 
-    result = ff.find_paths(a="foo")
-
     expected = {"filename": {0: str(path / "a1/foo/*")}, "a": {0: "foo"}}
     expected = pd.DataFrame.from_dict(expected)
 
+    result = ff.find_paths(a="foo")
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_paths(dict(a="foo"))
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_paths(dict(a="XXX"), a="foo")
     pd.testing.assert_frame_equal(result.df, expected)
 
 
@@ -147,8 +189,6 @@ def test_find_paths_wildcard(path, find_kwargs):
 
     ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
 
-    result = ff.find_paths(**find_kwargs)
-
     expected = {
         "filename": {0: str(path / "a1/foo/*"), 1: str(path / "a2/foo/*")},
         "a": {0: "a1", 1: "a2"},
@@ -156,6 +196,13 @@ def test_find_paths_wildcard(path, find_kwargs):
     }
     expected = pd.DataFrame.from_dict(expected)
 
+    result = ff.find_paths(**find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_paths(find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_paths({"b": "XXX"}, **find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
 
 
@@ -170,8 +217,6 @@ def test_find_paths_several(path, find_kwargs):
 
     ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
 
-    result = ff.find_paths(**find_kwargs)
-
     expected = {
         "filename": {0: str(path / "a1/foo/*"), 1: str(path / "a2/foo/*")},
         "a": {0: "a1", 1: "a2"},
@@ -179,6 +224,13 @@ def test_find_paths_several(path, find_kwargs):
     }
     expected = pd.DataFrame.from_dict(expected)
 
+    result = ff.find_paths(**find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_paths(find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_paths({"a": "XXX", "b": "XXX"}, **find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
 
 
@@ -193,7 +245,12 @@ def test_find_file_none_found(path):
         ff.find_files(a="foo")
 
     result = ff.find_files(a="foo", _allow_empty=True)
+    assert result == []
 
+    result = ff.find_files({"a": "foo"}, _allow_empty=True)
+    assert result == []
+
+    result = ff.find_files({"a": "XXX"}, _allow_empty=True, a="foo")
     assert result == []
 
 
@@ -204,11 +261,16 @@ def test_find_file_simple(path):
 
     ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
 
-    result = ff.find_files(a="foo")
-
     expected = {"filename": {0: str(path / "a1/foo/file")}, "a": {0: "foo"}}
     expected = pd.DataFrame.from_dict(expected)
 
+    result = ff.find_files(a="foo")
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_files({"a": "foo"})
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_files({"a": "XXX"}, a="foo")
     pd.testing.assert_frame_equal(result.df, expected)
 
 
@@ -220,8 +282,6 @@ def test_find_files_wildcard(path, find_kwargs):
 
     ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
 
-    result = ff.find_files(**find_kwargs)
-
     expected = {
         "filename": {0: str(path / "a1/foo/file"), 1: str(path / "a2/foo/file")},
         "a": {0: "a1", 1: "a2"},
@@ -229,6 +289,13 @@ def test_find_files_wildcard(path, find_kwargs):
     }
     expected = pd.DataFrame.from_dict(expected)
 
+    result = ff.find_files(**find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_files(find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_files({"b": "XXX"}, **find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
 
 
@@ -243,8 +310,6 @@ def test_find_files_several(path, find_kwargs):
 
     ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
 
-    result = ff.find_files(**find_kwargs)
-
     expected = {
         "filename": {0: str(path / "a1/foo/file"), 1: str(path / "a2/foo/file")},
         "a": {0: "a1", 1: "a2"},
@@ -252,4 +317,11 @@ def test_find_files_several(path, find_kwargs):
     }
     expected = pd.DataFrame.from_dict(expected)
 
+    result = ff.find_files(**find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_files(find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_files({"a": "XXX", "b": "XXX"}, **find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
