@@ -30,11 +30,7 @@ class FinderBase:
     def create_name(self, keys=None, **keys_kwargs):
         """build path from keys"""
 
-        print(f"{keys=}")
-        print(f"{keys_kwargs=}")
-
         keys = update_keys_dict_with_kwargs(keys, **keys_kwargs)
-        print(f"{keys=}")
 
         return self.pattern.format(**keys)
 
