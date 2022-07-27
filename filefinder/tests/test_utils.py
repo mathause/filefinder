@@ -1,4 +1,4 @@
-from .utils import _find_keys, atoi, natural_keys, product_dict
+from filefinder.utils import _find_keys, atoi, natural_keys, product_dict
 
 
 def test_find_keys():

@@ -3,7 +3,7 @@ import textwrap
 import pandas as pd
 import pytest
 
-from . import FileFinder
+from filefinder import FileFinder
 
 
 @pytest.fixture(scope="module")
