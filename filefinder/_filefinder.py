@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import parse
 
-from .utils import _find_keys, natural_keys, product_dict, update_keys_dict_with_kwargs
+from .utils import _find_keys, natural_keys, product_dict, update_dict_with_kwargs
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class _FinderBase:
             ``keys`` and ``keys_kwargs`` the latter takes priority.
         """
 
-        keys = update_keys_dict_with_kwargs(keys, **keys_kwargs)
+        keys = update_dict_with_kwargs(keys, **keys_kwargs)
 
         return self.pattern.format(**keys)
 
@@ -74,7 +74,7 @@ class _Finder(_FinderBase):
 
         """
 
-        keys = update_keys_dict_with_kwargs(keys=keys, **keys_kwargs)
+        keys = update_dict_with_kwargs(keys, **keys_kwargs)
 
         # wrap strings in list
         for key, value in keys.items():
