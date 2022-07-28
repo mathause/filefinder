@@ -54,6 +54,7 @@ class Finder(FinderBase):
                 keys[key] = [value]
 
         list_of_df = list()
+        all_patterns = list()
         for one_search_dict in product_dict(**keys):
 
             cond_dict = self._create_condition_dict(**one_search_dict)
@@ -67,13 +68,16 @@ class Finder(FinderBase):
             if df is not None:
                 list_of_df.append(df)
 
+            all_patterns.append(full_pattern)
+
         if list_of_df:
             df = pd.concat(list_of_df)
             df = df.reset_index(drop=True)
         elif _allow_empty:
             return []
         else:
-            msg = "Found no files matching criteria"
+            msg = "Found no files matching criteria. Tried the following pattern(s):"
+            msg += "".join(f"\n- '{pattern}'" for pattern in all_patterns)
             raise ValueError(msg)
 
         fc = FileContainer(df)
@@ -82,7 +86,8 @@ class Finder(FinderBase):
         len_unique = len(fc.combine_by_key().unique())
 
         msg = "This query leads to non-unique metadata. Please adjust your query."
-        assert len_all == len_unique, msg
+        if len_all != len_unique:
+            raise ValueError(msg)
 
         return fc
 
