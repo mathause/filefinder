@@ -19,7 +19,7 @@ keys: {repr_keys}
 """
 
 
-class FinderBase:
+class _FinderBase:
     def __init__(self, pattern, suffix=""):
 
         self.pattern = pattern
@@ -28,14 +28,23 @@ class FinderBase:
         self._suffix = suffix
 
     def create_name(self, keys=None, **keys_kwargs):
-        """build path from keys"""
+        """build name from keys
+
+        Parameters
+        ----------
+        keys : dict
+            Dictionary containing keys to create the name.
+        **keys_kwargs : {key: indexer, ...}, optional
+            The keyword arguments form of ``keys``. When the same key is passed in
+            ``keys`` and ``keys_kwargs`` the latter takes priority.
+        """
 
         keys = update_keys_dict_with_kwargs(keys, **keys_kwargs)
 
         return self.pattern.format(**keys)
 
 
-class Finder(FinderBase):
+class _Finder(_FinderBase):
     def _create_condition_dict(self, **kwargs):
 
         # add wildcard for all undefinded keys
@@ -45,6 +54,25 @@ class Finder(FinderBase):
         return cond_dict
 
     def find(self, keys=None, *, _allow_empty=False, **keys_kwargs):
+        """find files in the file system using the file and path (folder) pattern
+
+        Parameters
+        ----------
+        keys : dict
+            Dictionary containing keys to create the search pattern. Several names can
+            be passed for each key as list.
+        _allow_empty : bool, default: False
+            If False (default) raises an error if no files are found. If True returns
+            an empty list.
+        **keys_kwargs : {key: indexer, ...}, optional
+            The keyword arguments form of ``keys``. When the same key is passed in
+            ``keys`` and ``keys_kwargs`` the latter takes priority.
+
+        Notes
+        -----
+        Missing ``keys`` are replaced with ``"*"``.
+
+        """
 
         keys = update_keys_dict_with_kwargs(keys=keys, **keys_kwargs)
 
@@ -120,13 +148,32 @@ class Finder(FinderBase):
 
 
 class FileFinder:
-    def __init__(self, path_pattern, file_pattern):
+    """find and create file names based on python format syntax
+
+    Parameters
+    ----------
+    path_pattern : str
+        String denoting the path (folder) pattern where everything variable is enclosed
+        in curly braces.
+    file_pattern : str
+        String denoting the file pattern where everything variable is enclosed in curly
+        braces.
+
+    Examples
+    --------
+    >>> path_pattern = "/root/{category}"
+    >>> file_pattern = "{category}_file_{number}"
+
+    >>> ff = FileFinder(path_pattern, file_pattern)
+    """
+
+    def __init__(self, path_pattern: str, file_pattern: str) -> None:
 
         # cannot search for files (only paths and full)
-        self.file = FinderBase(file_pattern)
+        self.file = _FinderBase(file_pattern)
         # ensure path_pattern ends with a /
-        self.path = Finder(os.path.join(path_pattern, ""), suffix="*")
-        self.full = Finder(os.path.join(*filter(None, (path_pattern, file_pattern))))
+        self.path = _Finder(os.path.join(path_pattern, ""), suffix="*")
+        self.full = _Finder(os.path.join(*filter(None, (path_pattern, file_pattern))))
 
         self.keys_path = self.path.keys
         self.keys_file = self.file.keys
@@ -137,21 +184,177 @@ class FileFinder:
         self._full_pattern = self.full.pattern
 
     def create_path_name(self, keys=None, **keys_kwargs):
+        """build path (folder) name from keys
+
+        Parameters
+        ----------
+        keys : dict
+            Dictionary containing keys to create the path (folder) name.
+        **keys_kwargs : {key: indexer, ...}, optional
+            The keyword arguments form of ``keys``. When the same key is passed in
+            ``keys`` and ``keys_kwargs`` the latter takes priority.
+
+        Examples
+        --------
+        >>> path_pattern = "/root/{category}"
+        >>> file_pattern = "{category}_file_{number}"
+
+        >>> ff = FileFinder(path_pattern, file_pattern)
+        >>> ff.create_path_name(category="foo")
+        '/root/foo/'
+
+        >>> ff.create_path_name(dict(category="foo"))
+        '/root/foo/'
+
+        >>> ff.create_path_name(dict(category="foo"), category="bar")
+        '/root/bar/'
+        """
+
         # warnings.warn("'create_path_name' is deprecated, use 'path.name' instead")
         return self.path.create_name(keys, **keys_kwargs)
 
     def create_file_name(self, keys=None, **keys_kwargs):
+        """build file name from keys
+
+        Parameters
+        ----------
+        keys : dict
+            Dictionary containing keys to create the file name.
+        **keys_kwargs : {key: indexer, ...}, optional
+            The keyword arguments form of ``keys``. When the same key is passed in
+            ``keys`` and ``keys_kwargs`` the latter takes priority.
+
+        Examples
+        --------
+        >>> path_pattern = "/root/{category}"
+        >>> file_pattern = "{category}_file_{number}"
+
+        >>> ff = FileFinder(path_pattern, file_pattern)
+        >>> ff.create_file_name(category="foo", number=1)
+        'foo_file_1'
+
+        >>> ff.create_file_name(dict(category="foo", number=1))
+        'foo_file_1'
+
+        >>> ff.create_file_name(dict(category="foo", number=1), category="bar")
+        'bar_file_1'
+        """
+
         # warnings.warn("'create_file_name' is deprecated, use 'file.name' instead")
         return self.file.create_name(keys, **keys_kwargs)
 
     def create_full_name(self, keys=None, **keys_kwargs):
+        """build full (folder + file) name from keys
+
+        Parameters
+        ----------
+        keys : dict
+            Dictionary containing keys to create the full (folder + file) name.
+        **keys_kwargs : {key: indexer, ...}, optional
+            The keyword arguments form of ``keys``. When the same key is passed in
+            ``keys`` and ``keys_kwargs`` the latter takes priority.
+
+        Examples
+        --------
+        >>> path_pattern = "/root/{category}"
+        >>> file_pattern = "{category}_file_{number}"
+
+        >>> ff = FileFinder(path_pattern, file_pattern)
+        >>> ff.create_full_name(category="foo", number=1)
+        '/root/foo/foo_file_1'
+
+        >>> ff.create_full_name(dict(category="foo", number=1))
+        '/root/foo/foo_file_1'
+
+        >>> ff.create_full_name(dict(category="foo", number=1), category="bar")
+        '/root/bar/bar_file_1'
+        """
+
         # warnings.warn("'create_full_name' is deprecated, use 'full.name' instead")
         return self.full.create_name(keys, **keys_kwargs)
 
     def find_paths(self, keys=None, *, _allow_empty=False, **keys_kwargs):
+        """find files in the file system using the file and path (folder) pattern
+
+
+        Parameters
+        ----------
+        keys : dict
+            Dictionary containing keys to create the search pattern. Several names can
+            be passed for each key as list.
+        _allow_empty : bool, default: False
+            If False (default) raises an error if no files are found. If True returns
+            an empty list.
+        **keys_kwargs : {key: indexer, ...}, optional
+            The keyword arguments form of ``keys``. When the same key is passed in
+            ``keys`` and ``keys_kwargs`` the latter takes priority.
+
+        Notes
+        -----
+        Missing ``keys`` are replaced with ``"*"``.
+
+        Examples
+        --------
+        >>> path_pattern = "/root/{category}"
+        >>> file_pattern = "{category}_file_{number}"
+        >>> ff = FileFinder(path_pattern, file_pattern)
+
+        >>> ff.find()   # doctest: +SKIP
+        Looks for
+        - "/root/*/"
+
+        >>> ff.find(category="foo")   # doctest: +SKIP
+        Looks for
+        - "/root/foo/"
+
+        >>> ff.find(dict(category=["foo", "bar"]))   # doctest: +SKIP
+        Looks for
+        - "/root/foo/"
+        - "/root/bar/"
+        """
         return self.path.find(keys, _allow_empty=_allow_empty, **keys_kwargs)
 
     def find_files(self, keys=None, _allow_empty=False, **keys_kwargs):
+        """find files in the file system using the file pattern
+
+        Parameters
+        ----------
+        keys : dict
+            Dictionary containing keys to create the search pattern. Several names can
+            be passed for each key as list.
+        _allow_empty : bool, default: False
+            If False (default) raises an error if no files are found. If True returns
+            an empty list.
+        **keys_kwargs : {key: indexer, ...}, optional
+            The keyword arguments form of ``keys``. When the same key is passed in
+            ``keys`` and ``keys_kwargs`` the latter takes priority.
+
+        Notes
+        -----
+        Missing ``keys`` are replaced with ``"*"``.
+
+        Examples
+        --------
+        >>> path_pattern = "/root/{category}"
+        >>> file_pattern = "{category}_file_{number}"
+        >>> ff = FileFinder(path_pattern, file_pattern)
+
+        >>> ff.find_files()   # doctest: +SKIP
+        Looks for
+        - "/root/*/*_file_*"
+
+        >>> ff.find_files(number=[1, 2])   # doctest: +SKIP
+        Looks for
+        - "/root/*/*_file_1"
+        - "/root/*/*_file_2"
+
+        >>> meta = {"category": "foo", "number": [1, 2]}
+        >>> ff.find_files(meta, category="bar")   # doctest: +SKIP
+        Looks for
+        - "/root/bar/bar_file_1"
+        - "/root/bar/bar_file_2"
+
+        """
         return self.full.find(keys, _allow_empty=_allow_empty, **keys_kwargs)
 
     def __repr__(self):
