@@ -8,6 +8,11 @@ from filefinder import FileFinder
 
 @pytest.fixture(scope="module")
 def path(tmp_path_factory):
+    """
+    Creates the following temporary structure:
+    - /tmp/filefinder/a1/foo/file
+    - /tmp/filefinder/a2/foo/file
+    """
 
     tmp_path = tmp_path_factory.mktemp("filefinder")
 
@@ -148,7 +153,7 @@ def test_create_name_kwargs_priority():
 
 def test_find_path_none_found(path):
 
-    path_pattern = path / "{a}/"
+    path_pattern = path / "{a}/foo/"
     file_pattern = "file_pattern"
 
     ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
@@ -156,8 +161,13 @@ def test_find_path_none_found(path):
     with pytest.raises(ValueError, match="Found no files matching criteria"):
         ff.find_paths(a="foo")
 
-    result = ff.find_paths(a="foo", _allow_empty=True)
+    with pytest.raises(ValueError, match="Found no files matching criteria"):
+        ff.find_paths({"a": "foo"})
 
+    result = ff.find_paths(a="foo", _allow_empty=True)
+    assert result == []
+
+    result = ff.find_paths({"a": "foo"}, _allow_empty=True)
     assert result == []
 
 
@@ -234,23 +244,54 @@ def test_find_paths_several(path, find_kwargs):
     pd.testing.assert_frame_equal(result.df, expected)
 
 
-def test_find_file_none_found(path):
+@pytest.mark.parametrize(
+    "find_kwargs",
+    [{"a": "a1"}, {"a": "a1", "b": "foo"}, {"a": "a1", "b": ["foo", "bar"]}],
+)
+def test_find_paths_one_of_several(path, find_kwargs):
 
-    path_pattern = path / "{a}/"
+    path_pattern = path / "{a}/{b}"
     file_pattern = "file_pattern"
 
     ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
 
+    expected = {
+        "filename": {0: str(path / "a1/foo/*")},
+        "a": {0: "a1"},
+        "b": {0: "foo"},
+    }
+    expected = pd.DataFrame.from_dict(expected)
+
+    result = ff.find_paths(**find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_paths(find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_paths({"a": "XXX"}, **find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+
+def test_find_file_none_found(path):
+
+    path_pattern = path / "{a}/foo/"
+    file_pattern = "{file_pattern}"
+
+    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+
     with pytest.raises(ValueError, match="Found no files matching criteria"):
-        ff.find_files(a="foo")
+        ff.find_files(a="XXX")
 
-    result = ff.find_files(a="foo", _allow_empty=True)
+    with pytest.raises(ValueError, match="Found no files matching criteria"):
+        ff.find_files({"a": "XXX"})
+
+    result = ff.find_files(a="XXX", _allow_empty=True)
     assert result == []
 
-    result = ff.find_files({"a": "foo"}, _allow_empty=True)
+    result = ff.find_files({"a": "XXX"}, _allow_empty=True)
     assert result == []
 
-    result = ff.find_files({"a": "XXX"}, _allow_empty=True, a="foo")
+    result = ff.find_files({"a": "XXX"}, _allow_empty=True, a="XXX")
     assert result == []
 
 
@@ -324,4 +365,32 @@ def test_find_files_several(path, find_kwargs):
     pd.testing.assert_frame_equal(result.df, expected)
 
     result = ff.find_files({"a": "XXX", "b": "XXX"}, **find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+
+@pytest.mark.parametrize(
+    "find_kwargs",
+    [{"a": "a1"}, {"a": "a1", "b": "file"}, {"a": "a1", "b": ["file", "bar"]}],
+)
+def test_find_files_one_of_several(path, find_kwargs):
+
+    path_pattern = path / "{a}/foo"
+    file_pattern = "{b}"
+
+    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+
+    expected = {
+        "filename": {0: str(path / "a1/foo/file")},
+        "a": {0: "a1"},
+        "b": {0: "file"},
+    }
+    expected = pd.DataFrame.from_dict(expected)
+
+    result = ff.find_files(**find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_files(find_kwargs)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_files({"a": "XXX"}, **find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)

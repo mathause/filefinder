@@ -46,7 +46,7 @@ class Finder(FinderBase):
 
     def find(self, keys=None, *, _allow_empty=False, **keys_kwargs):
 
-        keys = update_keys_dict_with_kwargs(keys=None, **keys_kwargs)
+        keys = update_keys_dict_with_kwargs(keys=keys, **keys_kwargs)
 
         # wrap strings in list
         for key, value in keys.items():
