@@ -7,9 +7,8 @@ def _find_keys(pattern):
 
     find all keys enclosed by curly brackets
 
-    _find_keys("/path/{var_name}/{year}")
-    >>> set(["var_name", "year"])
-
+    >>> _find_keys("/path/{var_name}/{year}") == {"var_name", "year"}
+    True
     """
     keys = set(re.findall(r"\{([A-Za-z0-9_]+)\}", pattern))
 
@@ -25,10 +24,10 @@ def natural_keys(text):
 
     Example
     -------
-    > l = ['a10', 'a1']
-    > l.sort(key=natural_keys)
-    > l
-    >>> ['a1', 'a10']
+    >>> l = ['a10', 'a1']
+    >>> l.sort(key=natural_keys)
+    >>> l
+    ['a1', 'a10']
 
     References
     ----------
@@ -43,12 +42,8 @@ def product_dict(**kwargs):
 
     Example
     -------
-    list(product_dict({"a": [1, 2], "b": [3, 4], "c": [5]}))
-
-    >>> [{'a': 1, 'b': 3, 'c': 5},
-         {'a': 1, 'b': 4, 'c': 5},
-         {'a': 2, 'b': 3, 'c': 5},
-         {'a': 2, 'b': 4, 'c': 5}]
+    >>> list(product_dict(**{"a": [1, 2], "b": [3, 4], "c": [5]}))
+    [{'a': 1, 'b': 3, 'c': 5}, {'a': 1, 'b': 4, 'c': 5}, {'a': 2, 'b': 3, 'c': 5}, {'a': 2, 'b': 4, 'c': 5}]
 
     References
     ----------
@@ -56,24 +51,28 @@ def product_dict(**kwargs):
     """
 
     keys = kwargs.keys()
-    vals = kwargs.values()
-    for instance in itertools.product(*vals):
+    for instance in itertools.product(*kwargs.values()):
         yield dict(zip(keys, instance))
 
 
 def update_keys_dict_with_kwargs(keys=None, **keys_kwargs):
-    """
+    """update a dictionary with keyword arguments. The kwargs take precedence
 
-    Example
-    -------
+    Parameters
+    ----------
+    dictionary : dict, optional
+        The dictionary to update with the keyword arguments.
+    kwargs : keyword arguments
+        The keyword arguments.
 
-    update_keys_dict_with_kwargs({"a": 1}, a=2)
+    Examples
+    --------
 
-    >>> {'a': 2}
+    >>> update_keys_dict_with_kwargs({"a": 1}, a=2)
+    {'a': 2}
 
-    update_keys_dict_with_kwargs({"a": 1, "b":2}, b=3, c=5)
-
-    >>> {'a': 1, 'b': 3, 'c': 5}
+    >>> update_keys_dict_with_kwargs({"a": 1, "b":2}, b=3, c=5)
+    {'a': 1, 'b': 3, 'c': 5}
     """
 
     if keys is None:
