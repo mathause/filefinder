@@ -81,7 +81,7 @@ class _Finder(_FinderBase):
             if isinstance(value, str):
                 keys[key] = [value]
 
-        list_of_df = list()
+        all_paths = list()
         all_patterns = list()
         for one_search_dict in product_dict(**keys):
 
@@ -90,17 +90,12 @@ class _Finder(_FinderBase):
 
             paths = sorted(self._glob(full_pattern), key=natural_keys)
 
-            df = self._parse_paths(paths)
-
-            # only append if files were found
-            if df is not None:
-                list_of_df.append(df)
+            all_paths += paths
 
             all_patterns.append(full_pattern)
 
-        if list_of_df:
-            df = pd.concat(list_of_df)
-            df = df.reset_index(drop=True)
+        if all_paths:
+            df = self._parse_paths(all_paths)
         elif _allow_empty:
             return []
         else:
@@ -133,13 +128,10 @@ class _Finder(_FinderBase):
 
     def _parse_paths(self, paths):
 
-        if not paths:
-            return None
-
         out = list()
-        for pth in paths:
-            parsed = self.parser.parse(pth)
-            out.append([pth + self._suffix] + list(parsed.named.values()))
+        for path in paths:
+            parsed = self.parser.parse(path)
+            out.append([path + self._suffix] + list(parsed.named.values()))
 
         keys = ["filename"] + list(parsed.named.keys())
 
