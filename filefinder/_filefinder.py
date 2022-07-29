@@ -161,6 +161,11 @@ class FileFinder:
 
     def __init__(self, path_pattern: str, file_pattern: str) -> None:
 
+        if os.path.sep in file_pattern:
+            raise ValueError(
+                f"`file_pattern` cannot contain path separator ('{os.path.sep}')"
+            )
+
         # cannot search for files (only paths and full)
         self.file = _FinderBase(file_pattern)
         # ensure path_pattern ends with a /

@@ -1,3 +1,4 @@
+import os
 import textwrap
 
 import pandas as pd
@@ -47,13 +48,22 @@ def test_pattern_property():
     assert ff.full.pattern == path_pattern + file_pattern
 
 
+def test_file_pattern_no_sep():
+
+    path_pattern = "path_pattern"
+    file_pattern = "file" + os.path.sep + "pattern"
+
+    with pytest.raises(ValueError, match="cannot contain path separator"):
+        FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+
+
 def test_pattern_sep_added():
 
     path_pattern = "path_pattern"
     file_pattern = "file_pattern"
 
     ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
-    assert ff.path_pattern == path_pattern + "/"
+    assert ff.path_pattern == path_pattern + os.path.sep
 
 
 def test_keys():
