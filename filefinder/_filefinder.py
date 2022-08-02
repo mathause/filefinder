@@ -1,4 +1,5 @@
 import copy
+import fnmatch
 import glob
 import logging
 import os
@@ -150,6 +151,9 @@ class FileFinder:
     file_pattern : str
         String denoting the file pattern where everything variable is enclosed in curly
         braces.
+    test_paths : list of str, default None
+        A list of paths to use instead of querying the file system. To be used for
+        testing and demonstration.
 
     Examples
     --------
@@ -159,7 +163,9 @@ class FileFinder:
     >>> ff = FileFinder(path_pattern, file_pattern)
     """
 
-    def __init__(self, path_pattern: str, file_pattern: str) -> None:
+    def __init__(
+        self, path_pattern: str, file_pattern: str, *, test_paths=None
+    ) -> None:
 
         if os.path.sep in file_pattern:
             raise ValueError(
@@ -179,6 +185,29 @@ class FileFinder:
         self.file_pattern = self.file.pattern
         self.path_pattern = self.path.pattern
         self._full_pattern = self.full.pattern
+
+        if test_paths is not None:
+            self._set_test_paths(test_paths)
+
+    def _set_test_paths(self, test_paths):
+
+        if isinstance(test_paths, str):
+            test_paths = [test_paths]
+
+        # use fnmatch.filter to 'glob' pseudo-filenames
+        def finder(pat):
+
+            # make fnmatch work (almost) the same as glob
+            if pat.endswith(os.path.sep):
+                paths_ = [os.path.dirname(s) + os.path.sep for s in test_paths]
+            else:
+                paths_ = test_paths
+
+            return fnmatch.filter(paths_, pat)
+
+        # overwrite the glob implementation
+        self.path._glob = finder
+        self.full._glob = finder
 
     def create_path_name(self, keys=None, **keys_kwargs):
         """build path (folder) name from keys

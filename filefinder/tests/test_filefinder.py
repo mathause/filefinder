@@ -8,14 +8,17 @@ from filefinder import FileFinder
 
 
 @pytest.fixture(scope="module")
-def path(tmp_path_factory):
+def tmp_path(tmp_path_factory):
+    return tmp_path_factory.mktemp("filefinder")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def path(tmp_path):
     """
     Creates the following temporary structure:
     - /tmp/filefinder/a1/foo/file
     - /tmp/filefinder/a2/foo/file
     """
-
-    tmp_path = tmp_path_factory.mktemp("filefinder")
 
     d = tmp_path / "a1" / "foo"
     d.mkdir(parents=True)
@@ -28,6 +31,18 @@ def path(tmp_path_factory):
     f.write_text("")
 
     return tmp_path
+
+
+@pytest.fixture(scope="module", params=["from_filesystem", "from_string"])
+def test_paths(request, tmp_path):
+
+    if request.param == "from_filesystem":
+        return None
+
+    paths = ["a1/foo/file", "a2/foo/file"]
+    paths = [str(tmp_path / path) for path in paths]
+
+    return paths
 
 
 def test_pattern_property():
@@ -161,12 +176,14 @@ def test_create_name_kwargs_priority():
     assert result == "a/b/b_c"
 
 
-def test_find_path_none_found(path):
+def test_find_path_none_found(tmp_path, test_paths):
 
-    path_pattern = path / "{a}/foo/"
+    path_pattern = tmp_path / "{a}/foo/"
     file_pattern = "file_pattern"
 
-    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+    ff = FileFinder(
+        path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
+    )
 
     with pytest.raises(ValueError, match="Found no files matching criteria"):
         ff.find_paths(a="foo")
@@ -181,14 +198,16 @@ def test_find_path_none_found(path):
     assert result == []
 
 
-def test_find_paths_simple(path):
+def test_find_paths_simple(tmp_path, test_paths):
 
-    path_pattern = path / "a1/{a}/"
+    path_pattern = tmp_path / "a1/{a}/"
     file_pattern = "file_pattern"
 
-    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+    ff = FileFinder(
+        path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
+    )
 
-    expected = {"filename": {0: str(path / "a1/foo/*")}, "a": {0: "foo"}}
+    expected = {"filename": {0: str(tmp_path / "a1/foo/*")}, "a": {0: "foo"}}
     expected = pd.DataFrame.from_dict(expected)
 
     result = ff.find_paths(a="foo")
@@ -202,15 +221,17 @@ def test_find_paths_simple(path):
 
 
 @pytest.mark.parametrize("find_kwargs", [{"b": "foo"}, {"a": "*", "b": "foo"}])
-def test_find_paths_wildcard(path, find_kwargs):
+def test_find_paths_wildcard(tmp_path, test_paths, find_kwargs):
 
-    path_pattern = path / "{a}/{b}"
+    path_pattern = tmp_path / "{a}/{b}"
     file_pattern = "file_pattern"
 
-    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+    ff = FileFinder(
+        path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
+    )
 
     expected = {
-        "filename": {0: str(path / "a1/foo/*"), 1: str(path / "a2/foo/*")},
+        "filename": {0: str(tmp_path / "a1/foo/*"), 1: str(tmp_path / "a2/foo/*")},
         "a": {0: "a1", 1: "a2"},
         "b": {0: "foo", 1: "foo"},
     }
@@ -230,15 +251,17 @@ def test_find_paths_wildcard(path, find_kwargs):
     "find_kwargs",
     [{"a": ["a1", "a2"], "b": "foo"}, {"a": ["a1", "a2"], "b": ["foo", "bar"]}],
 )
-def test_find_paths_several(path, find_kwargs):
+def test_find_paths_several(tmp_path, test_paths, find_kwargs):
 
-    path_pattern = path / "{a}/{b}"
+    path_pattern = tmp_path / "{a}/{b}"
     file_pattern = "file_pattern"
 
-    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+    ff = FileFinder(
+        path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
+    )
 
     expected = {
-        "filename": {0: str(path / "a1/foo/*"), 1: str(path / "a2/foo/*")},
+        "filename": {0: str(tmp_path / "a1/foo/*"), 1: str(tmp_path / "a2/foo/*")},
         "a": {0: "a1", 1: "a2"},
         "b": {0: "foo", 1: "foo"},
     }
@@ -258,15 +281,17 @@ def test_find_paths_several(path, find_kwargs):
     "find_kwargs",
     [{"a": "a1"}, {"a": "a1", "b": "foo"}, {"a": "a1", "b": ["foo", "bar"]}],
 )
-def test_find_paths_one_of_several(path, find_kwargs):
+def test_find_paths_one_of_several(tmp_path, test_paths, find_kwargs):
 
-    path_pattern = path / "{a}/{b}"
+    path_pattern = tmp_path / "{a}/{b}"
     file_pattern = "file_pattern"
 
-    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+    ff = FileFinder(
+        path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
+    )
 
     expected = {
-        "filename": {0: str(path / "a1/foo/*")},
+        "filename": {0: str(tmp_path / "a1/foo/*")},
         "a": {0: "a1"},
         "b": {0: "foo"},
     }
@@ -282,12 +307,14 @@ def test_find_paths_one_of_several(path, find_kwargs):
     pd.testing.assert_frame_equal(result.df, expected)
 
 
-def test_find_file_none_found(path):
+def test_find_file_none_found(tmp_path, test_paths):
 
-    path_pattern = path / "{a}/foo/"
+    path_pattern = tmp_path / "{a}/foo/"
     file_pattern = "{file_pattern}"
 
-    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+    ff = FileFinder(
+        path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
+    )
 
     with pytest.raises(ValueError, match="Found no files matching criteria"):
         ff.find_files(a="XXX")
@@ -305,14 +332,16 @@ def test_find_file_none_found(path):
     assert result == []
 
 
-def test_find_file_simple(path):
+def test_find_file_simple(tmp_path, test_paths):
 
-    path_pattern = path / "a1/{a}/"
+    path_pattern = tmp_path / "a1/{a}/"
     file_pattern = "file"
 
-    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+    ff = FileFinder(
+        path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
+    )
 
-    expected = {"filename": {0: str(path / "a1/foo/file")}, "a": {0: "foo"}}
+    expected = {"filename": {0: str(tmp_path / "a1/foo/file")}, "a": {0: "foo"}}
     expected = pd.DataFrame.from_dict(expected)
 
     result = ff.find_files(a="foo")
@@ -326,15 +355,20 @@ def test_find_file_simple(path):
 
 
 @pytest.mark.parametrize("find_kwargs", [{"b": "file"}, {"a": "*", "b": "file"}])
-def test_find_files_wildcard(path, find_kwargs):
+def test_find_files_wildcard(tmp_path, test_paths, find_kwargs):
 
-    path_pattern = path / "{a}/foo"
+    path_pattern = tmp_path / "{a}/foo"
     file_pattern = "{b}"
 
-    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+    ff = FileFinder(
+        path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
+    )
 
     expected = {
-        "filename": {0: str(path / "a1/foo/file"), 1: str(path / "a2/foo/file")},
+        "filename": {
+            0: str(tmp_path / "a1/foo/file"),
+            1: str(tmp_path / "a2/foo/file"),
+        },
         "a": {0: "a1", 1: "a2"},
         "b": {0: "file", 1: "file"},
     }
@@ -354,15 +388,20 @@ def test_find_files_wildcard(path, find_kwargs):
     "find_kwargs",
     [{"a": ["a1", "a2"], "b": "file"}, {"a": ["a1", "a2"], "b": ["file", "bar"]}],
 )
-def test_find_files_several(path, find_kwargs):
+def test_find_files_several(tmp_path, test_paths, find_kwargs):
 
-    path_pattern = path / "{a}/foo"
+    path_pattern = tmp_path / "{a}/foo"
     file_pattern = "{b}"
 
-    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+    ff = FileFinder(
+        path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
+    )
 
     expected = {
-        "filename": {0: str(path / "a1/foo/file"), 1: str(path / "a2/foo/file")},
+        "filename": {
+            0: str(tmp_path / "a1/foo/file"),
+            1: str(tmp_path / "a2/foo/file"),
+        },
         "a": {0: "a1", 1: "a2"},
         "b": {0: "file", 1: "file"},
     }
@@ -382,15 +421,17 @@ def test_find_files_several(path, find_kwargs):
     "find_kwargs",
     [{"a": "a1"}, {"a": "a1", "b": "file"}, {"a": "a1", "b": ["file", "bar"]}],
 )
-def test_find_files_one_of_several(path, find_kwargs):
+def test_find_files_one_of_several(tmp_path, test_paths, find_kwargs):
 
-    path_pattern = path / "{a}/foo"
+    path_pattern = tmp_path / "{a}/foo"
     file_pattern = "{b}"
 
-    ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
+    ff = FileFinder(
+        path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
+    )
 
     expected = {
-        "filename": {0: str(path / "a1/foo/file")},
+        "filename": {0: str(tmp_path / "a1/foo/file")},
         "a": {0: "a1"},
         "b": {0: "file"},
     }
