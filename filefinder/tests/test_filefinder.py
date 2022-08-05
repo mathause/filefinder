@@ -445,3 +445,32 @@ def test_find_files_one_of_several(tmp_path, test_paths, find_kwargs):
 
     result = ff.find_files({"a": "XXX"}, **find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
+
+
+def test_find_unparsable():
+
+    ff = FileFinder("{cat}", "{cat}", test_paths=["a/b"])
+
+    with pytest.raises(
+        ValueError, match="Could not parse 'a/b' with the pattern '{cat}/{cat}'"
+    ):
+        ff.find_files()
+
+    ff = FileFinder("", "{cat}_{cat}", test_paths=["a_b"])
+
+    with pytest.raises(
+        ValueError, match="Could not parse 'a_b' with the pattern '{cat}_{cat}'"
+    ):
+        ff.find_files()
+
+    ff = FileFinder("{cat}_{cat}", "", test_paths=["a_b/"])
+
+    with pytest.raises(
+        ValueError, match="Could not parse 'a_b/' with the pattern '{cat}_{cat}'"
+    ):
+        ff.find_files()
+
+    with pytest.raises(
+        ValueError, match="Could not parse 'a_b/' with the pattern '{cat}_{cat}/'"
+    ):
+        ff.find_paths()
