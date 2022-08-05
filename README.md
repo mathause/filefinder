@@ -33,10 +33,10 @@ following folder structure:
 ```
 /root/a1/a1_file_1
 /root/a1/a1_file_2
-/root/a2/a2_file_1
-/root/a2/a2_file_2
-/root/a3/a2_file_1
-/root/a3/a2_file_2
+/root/b2/b2_file_1
+/root/b2/b2_file_2
+/root/c3/c3_file_1
+/root/c3/c3_file_2
 ```
 
 You can then look for paths:
@@ -46,8 +46,8 @@ ff.find_paths()
 >>> <FileContainer>
 >>>      filename category
 >>> 0  /root/a1/*       a1
->>> 1  /root/a2/*       a2
->>> 2  /root/a3/*       a3
+>>> 1  /root/b2/*       b2
+>>> 2  /root/c3/*       c3
 ```
 The placeholders (here `{category}`) is parsed and returned. You can also look for
 files:
@@ -58,17 +58,76 @@ ff.find_files()
 >>>              filename category number
 >>> 0  /root/a1/a1_file_1       a1      1
 >>> 1  /root/a1/a1_file_2       a1      2
->>> 2  /root/a2/a2_file_1       a2      1
->>> 3  /root/a2/a2_file_2       a2      2
->>> 4  /root/a3/a2_file_1       a3      1
->>> 5  /root/a3/a2_file_2       a3      2
+>>> 2  /root/b2/b2_file_1       b2      1
+>>> 3  /root/b2/b2_file_2       b2      2
+>>> 4  /root/c3/c3_file_1       c3      1
+>>> 5  /root/c3/c3_file_2       c3      2
 ```
 
 It's also possible to filter for certain files:
 ```python
-ff.find_files(category=["a1", "a2"], number=1)
+ff.find_files(category=["a1", "b2"], number=1)
 >>> <FileContainer>
 >>>              filename category number
 >>> 0  /root/a1/a1_file_1       a1      1
->>> 2  /root/a2/a2_file_1       a2      1
+>>> 2  /root/b2/b2_file_1       b2      1
+```
+
+## Filters
+
+Filters can postprocess the found paths in `<FileContainer>`. Currently only a `priority_filter`
+is implemented.
+
+Assuming you have data for several models with different time resolution, e.g., 1 hourly
+(`"1h"`), 6 hourly (`"6h"`), and daily (`"1d"`), but not all models have all time resolutions:
+
+```
+/root/a/a_1h
+/root/a/a_6h
+/root/a/a_1d
+
+/root/b/b_1h
+/root/b/b_6h
+
+/root/c/c_1h
+```
+
+You now want to get the `"1d"` data if available, and then the `"6h"` etc.. This can be achieved with the `priority filter`. Let's first parse the file names:
+
+```python
+ff = FileFinder("/root/{model}", "{model}_{time_res}")
+
+files = ff.find_files()
+files
+```
+
+which yields:
+
+```
+<FileContainer>
+       filename model time_res
+0  /root/a/a_1d     a       1d
+1  /root/a/a_1h     a       1h
+2  /root/a/a_6h     a       6h
+3  /root/b/b_1h     b       1h
+4  /root/b/b_6h     b       6h
+5  /root/c/c_1h     c       1h
+```
+
+We can now apply a `priority_filter` as follows:
+
+```python
+from filefinder.filters import priority_filter
+
+files = priority_filter(files, "time_res", ["1d", "6h", "1h"])
+files
+```
+
+Resulting in the desired selection:
+
+```
+       filename model time_res
+0  /root/a/a_1d     a       1d
+1  /root/b/b_6h     b       6h
+2  /root/c/c_1h     c       1h
 ```
