@@ -30,14 +30,13 @@ def parse_ens(filelist):
     for key in df.columns:
         filelist.df[key] = df[key].values
 
-    # filelist.df = filelist.df.assign(**df)
     return filelist
 
 
 def create_ensnumber(filelist, keys=None):
 
     if keys is None:
-        keys = ["exp", "table", "varn", "model"]
+        keys = ("exp", "table", "varn", "model")
 
     df = filelist.df
     combined = filelist.combine_by_key(keys)
@@ -58,6 +57,6 @@ def ensure_unique_grid(filelist):
     """ensure there is only one grid per simulation"""
 
     # each simulation must be unique in the combination of these keys
-    keys = ["exp", "table", "varn", "model", "ens"]
+    keys = ("exp", "table", "varn", "model", "ens")
 
-    return priority_filter(filelist, VALID_GRIDS, key="grid", groupby=keys)
+    return priority_filter(filelist, column="grid", order=VALID_GRIDS, groupby=keys)

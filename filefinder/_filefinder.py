@@ -435,7 +435,7 @@ class FileContainer:
         if keys is None:
             keys = list(self.df.columns.drop("filename"))
 
-        return self.df[keys].apply(lambda x: sep.join(x.map(str)), axis=1)
+        return self.df[list(keys)].apply(lambda x: sep.join(x.map(str)), axis=1)
 
     def search(self, **query):
 
