@@ -5,7 +5,8 @@
 
 - Add tests for the cmip functionality and fix issue with `filefinder.cmip.ensure_unique_grid`
   ([#35](https://github.com/mathause/filefinder/pull/35)).
-- Removed support for Python 3.6.
+- Removed support for python 3.6.
+- Explicitely test python 3.11.
 
 ## v0.1.0 - 05.08.2022
 
