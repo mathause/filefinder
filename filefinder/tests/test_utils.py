@@ -12,7 +12,7 @@ from filefinder.utils import (
 def test_find_keys():
 
     result = _find_keys("/path/{var_name}/{year}")
-    expected = set(["var_name", "year"])
+    expected = {"var_name", "year"}
 
     assert result == expected
 
