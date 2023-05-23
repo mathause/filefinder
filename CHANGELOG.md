@@ -1,5 +1,7 @@
 # Changelog
 
+## v0.3.0 - unreleased
+
 
 ## v0.2.0 - 23.05.2023
 
