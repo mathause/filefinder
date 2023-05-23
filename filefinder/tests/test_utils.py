@@ -9,10 +9,19 @@ from filefinder.utils import (
 )
 
 
-def test_find_keys():
+@pytest.mark.parametrize(
+    "string, expected",
+    (
+        ["/path/{var_name}/{year}", {"var_name", "year"}],
+        ["{a:d}{b:d}", {"a", "b"}],
+        ["{a}{b:d}", {"a", "b"}],
+        ["{a:d}{b}", {"a", "b"}],
+        ["{a:d}{b:d}{c:d}", {"a", "b", "c"}],
+    ),
+)
+def test_find_keys(string, expected):
 
-    result = _find_keys("/path/{var_name}/{year}")
-    expected = {"var_name", "year"}
+    result = _find_keys(string)
 
     assert result == expected
 

@@ -73,10 +73,45 @@ ff.find_files(category=["a1", "b2"], number=1)
 >>> 2  /root/b2/b2_file_1       b2      1
 ```
 
+## Format syntax
+
+You can pass format specifiers to allow more complex formats, see
+[format-specification](https://github.com/r1chardj0n3s/parse#format-specification) for details.
+Using format specifiers, you can parse names that are possible otherwise.
+
+### Example
+
+```python
+from filefinder import FileFinder
+
+paths = ["a1_abc", "ab200_abcdef",]
+
+ff = FileFinder("", "{letters:l}{num:d}_{beg:2}{end}", test_paths=paths)
+
+fc = ff.find_files()
+
+fc
+```
+
+which results in the following:
+
+```python
+<FileContainer>
+       filename letters  num beg   end
+0        a1_abc       a    1  ab     c
+1  ab200_abcdef      ab  200  ab  cdef
+```
+
+Note that `fc.df.num` has now a data type of `int` while without the `:d` it would be an
+string (or more precisely an object as pandas uses this dtype to represent strings).
+
+
 ## Filters
 
 Filters can postprocess the found paths in `<FileContainer>`. Currently only a `priority_filter`
 is implemented.
+
+### Example
 
 Assuming you have data for several models with different time resolution, e.g., 1 hourly
 (`"1h"`), 6 hourly (`"6h"`), and daily (`"1d"`), but not all models have all time resolutions:

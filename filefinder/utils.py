@@ -2,15 +2,27 @@ import itertools
 import re
 
 
-def _find_keys(pattern):
+def _find_keys(string):
     """find keys in a format string
 
     find all keys enclosed by curly brackets
 
     >>> _find_keys("/path/{var_name}/{year}") == {"var_name", "year"}
     True
+
+    >>> _find_keys("/path/{var_name}/{year:d}") == {"var_name", "year"}
+    True
     """
-    keys = set(re.findall(r"\{([A-Za-z0-9_]+)\}", pattern))
+
+    # match group
+    pattern = (
+        r"\{"
+        r"([A-Za-z0-9_]+)"  # capturing group with one or more characters, number or _
+        r"(?::.*?)?"  # non-capturing group, non greedy matching any char, zero or once
+        r"\}"
+    )
+
+    keys = set(re.findall(pattern, string))
 
     return keys
 

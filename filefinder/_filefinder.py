@@ -3,6 +3,7 @@ import fnmatch
 import glob
 import logging
 import os
+import re
 
 import numpy as np
 import pandas as pd
@@ -28,6 +29,11 @@ class _FinderBase:
         self.parser = parse.compile(self.pattern)
         self._suffix = suffix
 
+        # replace the fmt spec - add the capture group again
+        self._pattern_no_fmt_spec = re.sub(
+            r"\{([A-Za-z0-9_]+)(:.*?)\}", r"{\1}", pattern
+        )
+
     def create_name(self, keys=None, **keys_kwargs):
         """build name from keys
 
@@ -42,7 +48,7 @@ class _FinderBase:
 
         keys = update_dict_with_kwargs(keys, **keys_kwargs)
 
-        return self.pattern.format(**keys)
+        return self._pattern_no_fmt_spec.format(**keys)
 
 
 class _Finder(_FinderBase):
