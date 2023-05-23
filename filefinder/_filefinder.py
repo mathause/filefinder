@@ -49,7 +49,7 @@ class _Finder(_FinderBase):
     def _create_condition_dict(self, **kwargs):
 
         # add wildcard for all undefinded keys
-        cond_dict = {key: "*" for key in self.keys}
+        cond_dict = dict.fromkeys(self.keys, "*")
         cond_dict.update(**kwargs)
 
         return cond_dict
