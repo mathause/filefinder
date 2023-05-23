@@ -1,7 +1,7 @@
 # Changelog
 
 
-## v0.2.0 - unreleased
+## v0.2.0 - 23.05.2023
 
 - Allow passing format spec to the captured names to allow more precise name matching
 - ([#57](https://github.com/mathause/filefinder/pull/57)).
