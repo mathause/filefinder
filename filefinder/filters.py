@@ -29,7 +29,6 @@ def _wrap_filecontainer(func):
 
 @_wrap_filecontainer
 def priority_filter(obj, column, order, *, on_missing="error", groupby=None):
-
     """filter a dataframe on for nonunique entries according to a priority list
 
     Parameters
