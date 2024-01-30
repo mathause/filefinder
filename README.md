@@ -77,7 +77,7 @@ ff.find_files(category=["a1", "b2"], number=1)
 
 You can pass format specifiers to allow more complex formats, see
 [format-specification](https://github.com/r1chardj0n3s/parse#format-specification) for details.
-Using format specifiers, you can parse names that are possible otherwise.
+Using format specifiers, you can parse names that are not possible otherwise.
 
 ### Example
 
