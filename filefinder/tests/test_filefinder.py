@@ -447,6 +447,30 @@ def test_find_files_one_of_several(tmp_path, test_paths, find_kwargs):
     pd.testing.assert_frame_equal(result.df, expected)
 
 
+def test_find_paths_scalar_number():
+
+    ff = FileFinder(
+        path_pattern="{path}", file_pattern="{file}", test_paths=["1/1", "2/2"]
+    )
+
+    expected = {"filename": {0: "1/*"}, "path": {0: "1"}}
+    expected = pd.DataFrame.from_dict(expected)
+    result = ff.find_paths(path=1)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+
+def test_find_files_scalar_number():
+
+    ff = FileFinder(
+        path_pattern="{path}", file_pattern="{file}", test_paths=["1/1", "2/2"]
+    )
+
+    expected = {"filename": {0: "1/1"}, "path": {0: "1"}, "file": {0: "1"}}
+    expected = pd.DataFrame.from_dict(expected)
+    result = ff.find_files(file=1)
+    pd.testing.assert_frame_equal(result.df, expected)
+
+
 def test_find_unparsable():
 
     ff = FileFinder("{cat}", "{cat}", test_paths=["a/b"])

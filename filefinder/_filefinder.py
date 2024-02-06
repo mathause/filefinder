@@ -83,9 +83,9 @@ class _Finder(_FinderBase):
 
         keys = update_dict_with_kwargs(keys, **keys_kwargs)
 
-        # wrap strings in list
+        # wrap strings and scalars in list
         for key, value in keys.items():
-            if isinstance(value, str):
+            if isinstance(value, str) or np.ndim(value) == 0:
                 keys[key] = [value]
 
         all_paths = list()
