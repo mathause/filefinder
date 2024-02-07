@@ -3,6 +3,8 @@
 ## v0.3.0 - unreleased
 
 - Allow passing scalar numbers to `find_paths` and `find_files` ([#58](https://github.com/mathause/filefinder/issues/58)).
+  - Show duplicates for non-unique queries
+    ([#73](https://github.com/mathause/filefinder/pull/73))
 
 ## v0.2.0 - 23.05.2023
 
