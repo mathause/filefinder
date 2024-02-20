@@ -87,13 +87,13 @@ def test_keys():
     path_pattern = "{ab}_{c}"
     ff = FileFinder(path_pattern=path_pattern, file_pattern=file_pattern)
 
-    expected = {"a", "b", "c", "ab"}
+    expected = ("ab", "c", "a", "b")
     assert ff.keys == expected
 
-    expected = {"a", "b", "c"}
+    expected = ("a", "b", "c")
     assert ff.keys_file == expected
 
-    expected = {"ab", "c"}
+    expected = ("ab", "c")
     assert ff.keys_path == expected
 
 
@@ -479,6 +479,36 @@ def test_find_unparsable():
         ValueError, match="Could not parse 'a/b' with the pattern '{cat}/{cat}'"
     ):
         ff.find_files()
+
+    expected = pd.DataFrame(list(), columns=["filename", "cat"])
+
+    with pytest.warns(match="Could not parse 'a/b' with the pattern '{cat}/{cat}'"):
+        result = ff.find_files(on_parse_error="warn")
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    result = ff.find_files(on_parse_error="skip")
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    ff = FileFinder("{cat}", "{cat}", test_paths=["a/b", "a/a"])
+    expected = {"filename": {0: "a/a"}, "cat": {0: "a"}}
+    expected = pd.DataFrame.from_dict(expected)
+    result = ff.find_files(on_parse_error="skip")
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    with pytest.warns(match="Could not parse 'a/b' with the pattern '{cat}/{cat}'"):
+        result = ff.find_files(on_parse_error="warn")
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    with pytest.raises(
+        ValueError, match="Could not parse 'a/b' with the pattern '{cat}/{cat}'"
+    ):
+        ff.find_files(on_parse_error="raise")
+
+    with pytest.raises(
+        ValueError,
+        match="Unknown value for 'on_parse_error': 'foo'. Must be one of 'raise', 'warn' or 'skip'.",
+    ):
+        ff.find_files(on_parse_error="foo")
 
     ff = FileFinder("", "{cat}_{cat}", test_paths=["a_b"])
 

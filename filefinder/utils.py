@@ -1,16 +1,18 @@
 import itertools
 import re
 
+import pandas as pd
+
 
 def _find_keys(string):
     """find keys in a format string
 
     find all keys enclosed by curly brackets
 
-    >>> _find_keys("/path/{var_name}/{year}") == {"var_name", "year"}
+    >>> _find_keys("/path/{var_name}/{year}") == ("var_name", "year")
     True
 
-    >>> _find_keys("/path/{var_name}/{year:d}") == {"var_name", "year"}
+    >>> _find_keys("/path/{var_name}/{year:d}") == ("var_name", "year")
     True
     """
 
@@ -22,7 +24,8 @@ def _find_keys(string):
         r"\}"
     )
 
-    keys = set(re.findall(pattern, string))
+    keys = re.findall(pattern, string)
+    keys = tuple(pd.Series(keys).unique())
 
     return keys
 

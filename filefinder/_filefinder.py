@@ -4,6 +4,7 @@ import glob
 import logging
 import os
 import re
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -60,7 +61,9 @@ class _Finder(_FinderBase):
 
         return cond_dict
 
-    def find(self, keys=None, *, _allow_empty=False, **keys_kwargs):
+    def find(
+        self, keys=None, *, on_parse_error="raise", _allow_empty=False, **keys_kwargs
+    ):
         """find files in the file system using the file and path (folder) pattern
 
         Parameters
@@ -68,6 +71,9 @@ class _Finder(_FinderBase):
         keys : dict
             Dictionary containing keys to create the search pattern. Several names can
             be passed for each key as list.
+        on_parse_error : "raise" | "warn" | "skip", default: "raise"
+            What to do if a path/file name cannot be parsed. If "raise" raises a ValueError,
+            if "warn" raises a warning and if "skip" ignores the file.
         _allow_empty : bool, default: False
             If False (default) raises an error if no files are found. If True returns
             an empty list.
@@ -102,7 +108,7 @@ class _Finder(_FinderBase):
             all_patterns.append(full_pattern)
 
         if all_paths:
-            df = self._parse_paths(all_paths)
+            df = self._parse_paths(all_paths, on_parse_error=on_parse_error)
         elif _allow_empty:
             return []
         else:
@@ -135,21 +141,33 @@ class _Finder(_FinderBase):
 
         return glob.glob(pattern)
 
-    def _parse_paths(self, paths):
+    def _parse_paths(self, paths, on_parse_error):
 
         out = list()
         for path in paths:
             parsed = self.parser.parse(path)
 
             if parsed is None:
-                raise ValueError(
-                    f"Could not parse '{path}' with the pattern '{self.pattern}' - are"
-                    " there contradictory values?"
-                )
+                if on_parse_error == "raise":
+                    raise ValueError(
+                        f"Could not parse '{path}' with the pattern '{self.pattern}' - are"
+                        " there contradictory values?"
+                    )
+                elif on_parse_error == "warn":
+                    warnings.warn(
+                        f"Could not parse '{path}' with the pattern '{self.pattern}' - are"
+                        " there contradictory values?"
+                    )
+                elif on_parse_error == "skip":
+                    pass
+                else:
+                    raise ValueError(
+                        f"Unknown value for 'on_parse_error': '{on_parse_error}'. Must be one of 'raise', 'warn' or 'skip'."
+                    )
+            else:
+                out.append([path + self._suffix] + list(parsed.named.values()))
 
-            out.append([path + self._suffix] + list(parsed.named.values()))
-
-        keys = ["filename"] + list(parsed.named.keys())
+        keys = ["filename"] + list(self.keys)
 
         df = pd.DataFrame(out, columns=keys)
         return df
@@ -314,7 +332,9 @@ class FileFinder:
         # warnings.warn("'create_full_name' is deprecated, use 'full.name' instead")
         return self.full.create_name(keys, **keys_kwargs)
 
-    def find_paths(self, keys=None, *, _allow_empty=False, **keys_kwargs):
+    def find_paths(
+        self, keys=None, *, on_parse_error="raise", _allow_empty=False, **keys_kwargs
+    ):
         """find files in the file system using the file and path (folder) pattern
 
 
@@ -323,6 +343,9 @@ class FileFinder:
         keys : dict
             Dictionary containing keys to create the search pattern. Several names can
             be passed for each key as list.
+        on_parse_error : "raise" | "warn" | "skip", default: "raise"
+            What to do if a path/file name cannot be parsed. If "raise" raises a ValueError,
+            if "warn" raises a warning and if "skip" ignores the file.
         _allow_empty : bool, default: False
             If False (default) raises an error if no files are found. If True returns
             an empty list.
@@ -353,9 +376,16 @@ class FileFinder:
         - "/root/foo/"
         - "/root/bar/"
         """
-        return self.path.find(keys, _allow_empty=_allow_empty, **keys_kwargs)
+        return self.path.find(
+            keys,
+            on_parse_error=on_parse_error,
+            _allow_empty=_allow_empty,
+            **keys_kwargs,
+        )
 
-    def find_files(self, keys=None, _allow_empty=False, **keys_kwargs):
+    def find_files(
+        self, keys=None, on_parse_error="raise", _allow_empty=False, **keys_kwargs
+    ):
         """find files in the file system using the file pattern
 
         Parameters
@@ -363,6 +393,9 @@ class FileFinder:
         keys : dict
             Dictionary containing keys to create the search pattern. Several names can
             be passed for each key as list.
+        on_parse_error : "raise" | "warn" | "skip", default: "raise"
+            What to do if a path/file name cannot be parsed. If "raise" raises a ValueError,
+            if "warn" raises a warning and if "skip" ignores the file.
         _allow_empty : bool, default: False
             If False (default) raises an error if no files are found. If True returns
             an empty list.
@@ -396,7 +429,12 @@ class FileFinder:
         - "/root/bar/bar_file_2"
 
         """
-        return self.full.find(keys, _allow_empty=_allow_empty, **keys_kwargs)
+        return self.full.find(
+            keys,
+            on_parse_error=on_parse_error,
+            _allow_empty=_allow_empty,
+            **keys_kwargs,
+        )
 
     def __repr__(self):
 
