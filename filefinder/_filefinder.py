@@ -477,7 +477,7 @@ class FileContainer:
             return ret
 
     def combine_by_key(self, keys=None, sep="."):
-        """combine colums"""
+        """combine columns"""
 
         if keys is None:
             keys = list(self.df.columns.drop("filename"))
