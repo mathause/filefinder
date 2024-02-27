@@ -2,6 +2,7 @@
 
 ## v0.3.0 - unreleased
 
+- Drop support for python 3.7 and 3.8 ([#80](https://github.com/mathause/filefinder/pull/80))
 - Allow passing scalar numbers to `find_paths` and `find_files` ([#58](https://github.com/mathause/filefinder/issues/58)).
 - Show duplicates for non-unique queries
     ([#73](https://github.com/mathause/filefinder/pull/73))

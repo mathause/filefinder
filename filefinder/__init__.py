@@ -1,15 +1,9 @@
 # flake8: noqa
 
+from importlib.metadata import version as _get_version
+
 from . import _filefinder, cmip, utils
 from ._filefinder import FileContainer, FileFinder
-
-try:
-    from importlib.metadata import version as _get_version
-except ImportError:
-    # importlib.metadata not available in python 3.7
-    import pkg_resources
-
-    _get_version = lambda pkg: pkg_resources.get_distribution(pkg).version
 
 try:
     __version__ = _get_version("filefinder")
