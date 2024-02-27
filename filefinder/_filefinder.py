@@ -338,7 +338,6 @@ class FileFinder:
     ):
         """find files in the file system using the file and path (folder) pattern
 
-
         Parameters
         ----------
         keys : dict
