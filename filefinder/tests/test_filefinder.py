@@ -486,13 +486,13 @@ def test_find_unparsable():
         result = ff.find_files(on_parse_error="warn")
     pd.testing.assert_frame_equal(result.df, expected)
 
-    result = ff.find_files(on_parse_error="skip")
+    result = ff.find_files(on_parse_error="ignore")
     pd.testing.assert_frame_equal(result.df, expected)
 
     ff = FileFinder("{cat}", "{cat}", test_paths=["a/b", "a/a"])
     expected = {"filename": {0: "a/a"}, "cat": {0: "a"}}
     expected = pd.DataFrame.from_dict(expected)
-    result = ff.find_files(on_parse_error="skip")
+    result = ff.find_files(on_parse_error="ignore")
     pd.testing.assert_frame_equal(result.df, expected)
 
     with pytest.warns(match="Could not parse 'a/b' with the pattern '{cat}/{cat}'"):
@@ -506,7 +506,7 @@ def test_find_unparsable():
 
     with pytest.raises(
         ValueError,
-        match="Unknown value for 'on_parse_error': 'foo'. Must be one of 'raise', 'warn' or 'skip'.",
+        match="Unknown value for 'on_parse_error': 'foo'. Must be one of 'raise', 'warn' or 'ignore'.",
     ):
         ff.find_files(on_parse_error="foo")
 

@@ -71,9 +71,9 @@ class _Finder(_FinderBase):
         keys : dict
             Dictionary containing keys to create the search pattern. Several names can
             be passed for each key as list.
-        on_parse_error : "raise" | "warn" | "skip", default: "raise"
+        on_parse_error : "raise" | "warn" | "ignore", default: "raise"
             What to do if a path/file name cannot be parsed. If "raise" raises a ValueError,
-            if "warn" raises a warning and if "skip" ignores the file.
+            if "warn" raises a warning and if "ignore" ignores the file.
         _allow_empty : bool, default: False
             If False (default) raises an error if no files are found. If True returns
             an empty list.
@@ -88,6 +88,11 @@ class _Finder(_FinderBase):
         """
 
         keys = update_dict_with_kwargs(keys, **keys_kwargs)
+
+        if on_parse_error not in ["raise", "warn", "ignore"]:
+            raise ValueError(
+                f"Unknown value for 'on_parse_error': '{on_parse_error}'. Must be one of 'raise', 'warn' or 'ignore'."
+            )
 
         # wrap strings and scalars in list
         for key, value in keys.items():
@@ -158,12 +163,8 @@ class _Finder(_FinderBase):
                         f"Could not parse '{path}' with the pattern '{self.pattern}' - are"
                         " there contradictory values?"
                     )
-                elif on_parse_error == "skip":
+                elif on_parse_error == "ignore":
                     pass
-                else:
-                    raise ValueError(
-                        f"Unknown value for 'on_parse_error': '{on_parse_error}'. Must be one of 'raise', 'warn' or 'skip'."
-                    )
             else:
                 out.append([path + self._suffix] + list(parsed.named.values()))
 
