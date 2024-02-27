@@ -59,6 +59,20 @@ def test_priority_filter_missing():
     ):
         result = priority_filter(df, "res", ["h", "d"], on_missing="warn")
 
+    with pytest.raises(
+        ValueError, match="Did not find any element from the priority list"
+    ):
+        with pytest.warns(
+            FutureWarning, match="on_missing value 'error' has been renamed to 'raise'"
+        ):
+            result = priority_filter(df, "res", ["h", "d"], on_missing="error")
+
+    with pytest.raises(
+        ValueError,
+        match="Unknown value for 'on_missing': 'foo'. Must be one of 'raise', 'warn' or 'ignore'.",
+    ):
+        result = priority_filter(df, "res", ["h", "d"], on_missing="foo")
+
     pd.testing.assert_frame_equal(result, expected)
 
     with assert_no_warnings():
