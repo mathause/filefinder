@@ -80,3 +80,6 @@ def test_update_dict_with_kwargs():
 
     with pytest.raises(TypeError, match="got 'str'"):
         update_dict_with_kwargs("")
+
+    with pytest.raises(TypeError, match="missing 1 required positional argument"):
+        update_dict_with_kwargs(dictionary={})
