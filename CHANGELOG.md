@@ -1,6 +1,8 @@
 # Changelog
 
-## v0.3.0 - unreleased
+## v0.3.0 - 27.03.2024
+
+New release that adds handling for parsing errors. It also drops python 3.7 and 3.8 support.
 
 - Change `on_missing` option in the `priority_filter` from "error" to "raise".
   ([#79](https://github.com/mathause/filefinder/pull/79))
