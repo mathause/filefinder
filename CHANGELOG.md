@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.4.0 - unreleased
+
+- The `FileFinder.find_files` arguments `on_parse_error` and `_allow_empty` can no
+  longer be passed by position ([#99](https://github.com/mathause/filefinder/pull/99)).
+- `FileFinder` now raises an error if an invalid `"{placeholder}"` is used
+   ([#99](https://github.com/mathause/filefinder/pull/99)).
+
 ## v0.3.0 - 27.03.2024
 
 New release that adds handling for parsing errors. It also drops python 3.7 and 3.8 support.

@@ -45,6 +45,16 @@ def test_paths(request, tmp_path):
     return paths
 
 
+@pytest.mark.parametrize("placeholder", ("keys", "on_parse_error", "_allow_empty"))
+def test_pattern_invalid_placeholder(placeholder):
+
+    with pytest.raises(ValueError, match=f"'{placeholder}' is not a valid placeholder"):
+        FileFinder("", f"{{{placeholder}}}")
+
+    with pytest.raises(ValueError, match=f"'{placeholder}' is not a valid placeholder"):
+        FileFinder(f"{{{placeholder}}}", "")
+
+
 def test_pattern_property():
 
     path_pattern = "path_pattern/"

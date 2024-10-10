@@ -21,12 +21,22 @@ file_pattern: '{file_pattern}'
 keys: {repr_keys}
 """
 
+_RESERVED_PLACEHOLDERS = {"keys", "on_parse_error", "_allow_empty"}
+
+
+def _assert_valid_keys(keys):
+
+    for key in _RESERVED_PLACEHOLDERS:
+        if key in keys:
+            raise ValueError(f"'{key}' is not a valid placeholder")
+
 
 class _FinderBase:
     def __init__(self, pattern, suffix=""):
 
         self.pattern = pattern
         self.keys = _find_keys(pattern)
+        _assert_valid_keys(self.keys)
         self.parser = parse.compile(self.pattern)
         self._suffix = suffix
 
@@ -384,7 +394,7 @@ class FileFinder:
         )
 
     def find_files(
-        self, keys=None, on_parse_error="raise", _allow_empty=False, **keys_kwargs
+        self, keys=None, *, on_parse_error="raise", _allow_empty=False, **keys_kwargs
     ):
         """find files in the file system using the file pattern
 
