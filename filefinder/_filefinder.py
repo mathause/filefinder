@@ -144,6 +144,39 @@ class _Finder(_FinderBase):
 
         return fc
 
+    def find_single(self, keys=None, **keys_kwargs):
+        """
+        find exactly one file/ path in the file system using the file and path pattern
+
+        Parameters
+        ----------
+        keys : dict
+            Dictionary containing keys to create the search pattern.
+        **keys_kwargs : {key: indexer, ...}, optional
+            The keyword arguments form of ``keys``. When the same key is passed in
+            ``keys`` and ``keys_kwargs`` the latter takes priority.
+
+        Notes
+        -----
+        Missing ``keys`` are replaced with ``"*"``.
+
+        Raises
+        ------
+        ValueError : if more or less than one file/ path is found
+        """
+
+        fc = self.find(keys, on_parse_error="raise", _allow_empty=False, **keys_kwargs)
+
+        if len(fc) > 1:
+            n_found = len(fc)
+            msg = (
+                f"Found more than one ({n_found}) files/ paths. Please adjust your"
+                f" query.\nFirst five files/ paths:\n{fc.df.head()}"
+            )
+            raise ValueError(msg)
+
+        return fc
+
     @staticmethod
     def _glob(pattern):
         """Return a list of paths matching a pathname pattern
@@ -373,15 +406,15 @@ class FileFinder:
         >>> file_pattern = "{category}_file_{number}"
         >>> ff = FileFinder(path_pattern, file_pattern)
 
-        >>> ff.find()   # doctest: +SKIP
+        >>> ff.find_paths()   # doctest: +SKIP
         Looks for
         - "/root/*/"
 
-        >>> ff.find(category="foo")   # doctest: +SKIP
+        >>> ff.find_paths(category="foo")   # doctest: +SKIP
         Looks for
         - "/root/foo/"
 
-        >>> ff.find(dict(category=["foo", "bar"]))   # doctest: +SKIP
+        >>> ff.find_paths(dict(category=["foo", "bar"]))   # doctest: +SKIP
         Looks for
         - "/root/foo/"
         - "/root/bar/"
@@ -445,6 +478,52 @@ class FileFinder:
             _allow_empty=_allow_empty,
             **keys_kwargs,
         )
+
+    def find_single_path(self, keys=None, **keys_kwargs):
+        """
+        find exactly one path in the file system using the path pattern
+
+        Parameters
+        ----------
+        keys : dict
+            Dictionary containing keys to create the search pattern.
+        **keys_kwargs : {key: indexer, ...}, optional
+            The keyword arguments form of ``keys``. When the same key is passed in
+            ``keys`` and ``keys_kwargs`` the latter takes priority.
+
+        Notes
+        -----
+        Missing ``keys`` are replaced with ``"*"``.
+
+        Raises
+        ------
+        ValueError : if more or less than one path is found
+        """
+
+        return self.path.find_single(keys, **keys_kwargs)
+
+    def find_single_file(self, keys=None, **keys_kwargs):
+        """
+        find exactly one file in the file system using the file and path pattern
+
+        Parameters
+        ----------
+        keys : dict
+            Dictionary containing keys to create the search pattern.
+        **keys_kwargs : {key: indexer, ...}, optional
+            The keyword arguments form of ``keys``. When the same key is passed in
+            ``keys`` and ``keys_kwargs`` the latter takes priority.
+
+        Notes
+        -----
+        Missing ``keys`` are replaced with ``"*"``.
+
+        Raises
+        ------
+        ValueError : if more or less than one file is found
+        """
+
+        return self.full.find_single(keys, **keys_kwargs)
 
     def __repr__(self):
 

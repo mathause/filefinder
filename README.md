@@ -13,6 +13,8 @@ file_pattern = "{category}_file_{number}"
 ff = FileFinder(path_pattern, file_pattern)
 ```
 
+## Create file and path names
+
 Everything enclosed in curly brackets is a placeholder. Thus, you can create file and
 path names like so:
 
@@ -26,6 +28,8 @@ ff.create_file_name(category="a", number=1)
 ff.create_full_name(category="a", number=1)
 >>> /root/a/a_file_1
 ```
+
+## Find files on disk
 
 However, the strength of filefinder is parsing file names on disk. Assuming you have the
 following folder structure:
@@ -72,6 +76,17 @@ ff.find_files(category=["a1", "b2"], number=1)
 >>> 0  /root/a1/a1_file_1       a1      1
 >>> 2  /root/b2/b2_file_1       b2      1
 ```
+
+Often we need to be sure to find _exactly one_ file or path. This can be achieved using
+
+```python
+ff.find_single_file(category="a1", number=1)
+>>> <FileContainer>
+>>>              filename category number
+>>> 0  /root/a1/a1_file_1       a1      1
+```
+
+If none or more than one file is found a `ValueError` is raised.
 
 ## Format syntax
 
