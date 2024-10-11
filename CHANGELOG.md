@@ -9,6 +9,7 @@
   longer be passed by position ([#99](https://github.com/mathause/filefinder/pull/99)).
 - `FileFinder` now raises an error if an invalid `"{placeholder}"` is used
    ([#99](https://github.com/mathause/filefinder/pull/99)).
+- Explicitly test on python 3.13 ([#103](https://github.com/mathause/filefinder/pull/103)).
 - Drop support for python 3.9 ([#102](https://github.com/mathause/filefinder/pull/102)).
 
 ## v0.3.0 - 27.03.2024
