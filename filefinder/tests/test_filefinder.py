@@ -55,6 +55,16 @@ def test_pattern_invalid_placeholder(placeholder):
         FileFinder(f"{{{placeholder}}}", "")
 
 
+@pytest.mark.parametrize("pattern", ("{}", "{_fixed}"))
+def test_only_named_fields(pattern):
+
+    with pytest.raises(ValueError, match="Only named fields are currently allowed"):
+        FileFinder("", pattern)
+
+    with pytest.raises(ValueError, match="Only named fields are currently allowed"):
+        FileFinder(pattern, "")
+
+
 def test_pattern_property():
 
     path_pattern = "path_pattern/"

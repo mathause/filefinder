@@ -5,6 +5,8 @@
 - Added two methods to find _exactly_ one file or path (and raise an error otherwise):
   `FileFinder.find_single_file` and `FileFinder.find_single_path`
   ([#101](https://github.com/mathause/filefinder/pull/101)).
+- Raise an error if an unnamed placeholder (e.g., `"{}"`) is passed
+  ([#110](https://github.com/mathause/filefinder/pull/110))
 - The `FileFinder.find_files` arguments `on_parse_error` and `_allow_empty` can no
   longer be passed by position ([#99](https://github.com/mathause/filefinder/pull/99)).
 - `FileFinder` now raises an error if an invalid `"{placeholder}"` is used

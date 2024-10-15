@@ -38,6 +38,14 @@ class _FinderBase:
         self.keys = _find_keys(pattern)
         _assert_valid_keys(self.keys)
         self.parser = parse.compile(self.pattern)
+
+        if self.parser.fixed_fields:
+            msg = (
+                "Only named fields are currently allowed: avoid empty braces and"
+                " leading underscores."
+            )
+            raise ValueError(msg)
+
         self._suffix = suffix
 
         # replace the fmt spec - add the capture group again
