@@ -211,10 +211,10 @@ def test_find_path_none_found(tmp_path, test_paths):
     with pytest.raises(ValueError, match="Found no files matching criteria"):
         ff.find_paths({"a": "foo"})
 
-    result = ff.find_paths(a="foo", _allow_empty=True)
+    result = ff.find_paths(a="foo", on_empty="allow")
     assert result == []
 
-    result = ff.find_paths({"a": "foo"}, _allow_empty=True)
+    result = ff.find_paths({"a": "foo"}, on_empty="allow")
     assert result == []
 
 
@@ -369,13 +369,13 @@ def test_find_file_none_found(tmp_path, test_paths):
     with pytest.raises(ValueError, match="Found no files matching criteria"):
         ff.find_files({"a": "XXX"})
 
-    result = ff.find_files(a="XXX", _allow_empty=True)
+    result = ff.find_files(a="XXX", on_empty="allow")
     assert result == []
 
-    result = ff.find_files({"a": "XXX"}, _allow_empty=True)
+    result = ff.find_files({"a": "XXX"}, on_empty="allow")
     assert result == []
 
-    result = ff.find_files({"a": "XXX"}, _allow_empty=True, a="XXX")
+    result = ff.find_files({"a": "XXX"}, on_empty="allow", a="XXX")
     assert result == []
 
 
