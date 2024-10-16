@@ -111,13 +111,13 @@ def test_find_paths_fmt():
     )
 
     expected = {
-        "filename": {0: "a1/a1_abc", 1: "ab200/ab200_aicdef"},
+        "path": {0: "a1/a1_abc", 1: "ab200/ab200_aicdef"},
         "letters": {0: "a", 1: "ab"},
         "num": {0: 1, 1: 200},
         "beg": {0: "ab", 1: "ai"},
         "end": {0: "c", 1: "cdef"},
     }
-    expected = pd.DataFrame.from_dict(expected)
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_files()
     pd.testing.assert_frame_equal(result.df, expected)

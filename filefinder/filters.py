@@ -126,6 +126,5 @@ def _prioritize(df, key, order, on_missing, multiindex):
                 pass
 
     df = pd.concat(out, axis=0)
-    df = df.reset_index(drop=True)
 
     return df

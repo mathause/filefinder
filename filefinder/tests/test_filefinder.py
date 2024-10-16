@@ -227,8 +227,8 @@ def test_find_paths_simple(tmp_path, test_paths):
         path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
     )
 
-    expected = {"filename": {0: str(tmp_path / "a1/foo/*")}, "a": {0: "foo"}}
-    expected = pd.DataFrame.from_dict(expected)
+    expected = {"path": {0: str(tmp_path / "a1/foo/*")}, "a": {0: "foo"}}
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_paths(a="foo")
     pd.testing.assert_frame_equal(result.df, expected)
@@ -251,11 +251,11 @@ def test_find_paths_wildcard(tmp_path, test_paths, find_kwargs):
     )
 
     expected = {
-        "filename": {0: str(tmp_path / "a1/foo/*"), 1: str(tmp_path / "a2/foo/*")},
+        "path": {0: str(tmp_path / "a1/foo/*"), 1: str(tmp_path / "a2/foo/*")},
         "a": {0: "a1", 1: "a2"},
         "b": {0: "foo", 1: "foo"},
     }
-    expected = pd.DataFrame.from_dict(expected)
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_paths(**find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
@@ -281,11 +281,11 @@ def test_find_paths_several(tmp_path, test_paths, find_kwargs):
     )
 
     expected = {
-        "filename": {0: str(tmp_path / "a1/foo/*"), 1: str(tmp_path / "a2/foo/*")},
+        "path": {0: str(tmp_path / "a1/foo/*"), 1: str(tmp_path / "a2/foo/*")},
         "a": {0: "a1", 1: "a2"},
         "b": {0: "foo", 1: "foo"},
     }
-    expected = pd.DataFrame.from_dict(expected)
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_paths(**find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
@@ -311,11 +311,11 @@ def test_find_paths_one_of_several(tmp_path, test_paths, find_kwargs):
     )
 
     expected = {
-        "filename": {0: str(tmp_path / "a1/foo/*")},
+        "path": {0: str(tmp_path / "a1/foo/*")},
         "a": {0: "a1"},
         "b": {0: "foo"},
     }
-    expected = pd.DataFrame.from_dict(expected)
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_paths(**find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
@@ -344,8 +344,8 @@ def test_find_single_path(tmp_path, test_paths):
     with pytest.raises(ValueError, match="Found no files matching criteria"):
         ff.find_single_path(a="a3")
 
-    expected = {"filename": {0: str(tmp_path / "a1/foo/*")}, "a": {0: "a1"}}
-    expected = pd.DataFrame.from_dict(expected)
+    expected = {"path": {0: str(tmp_path / "a1/foo/*")}, "a": {0: "a1"}}
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_single_path(a="a1")
     pd.testing.assert_frame_equal(result.df, expected)
@@ -388,8 +388,8 @@ def test_find_file_simple(tmp_path, test_paths):
         path_pattern=path_pattern, file_pattern=file_pattern, test_paths=test_paths
     )
 
-    expected = {"filename": {0: str(tmp_path / "a1/foo/file")}, "a": {0: "foo"}}
-    expected = pd.DataFrame.from_dict(expected)
+    expected = {"path": {0: str(tmp_path / "a1/foo/file")}, "a": {0: "foo"}}
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_files(a="foo")
     pd.testing.assert_frame_equal(result.df, expected)
@@ -412,14 +412,14 @@ def test_find_files_wildcard(tmp_path, test_paths, find_kwargs):
     )
 
     expected = {
-        "filename": {
+        "path": {
             0: str(tmp_path / "a1/foo/file"),
             1: str(tmp_path / "a2/foo/file"),
         },
         "a": {0: "a1", 1: "a2"},
         "b": {0: "file", 1: "file"},
     }
-    expected = pd.DataFrame.from_dict(expected)
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_files(**find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
@@ -445,14 +445,14 @@ def test_find_files_several(tmp_path, test_paths, find_kwargs):
     )
 
     expected = {
-        "filename": {
+        "path": {
             0: str(tmp_path / "a1/foo/file"),
             1: str(tmp_path / "a2/foo/file"),
         },
         "a": {0: "a1", 1: "a2"},
         "b": {0: "file", 1: "file"},
     }
-    expected = pd.DataFrame.from_dict(expected)
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_files(**find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
@@ -478,11 +478,11 @@ def test_find_files_one_of_several(tmp_path, test_paths, find_kwargs):
     )
 
     expected = {
-        "filename": {0: str(tmp_path / "a1/foo/file")},
+        "path": {0: str(tmp_path / "a1/foo/file")},
         "a": {0: "a1"},
         "b": {0: "file"},
     }
-    expected = pd.DataFrame.from_dict(expected)
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_files(**find_kwargs)
     pd.testing.assert_frame_equal(result.df, expected)
@@ -511,8 +511,8 @@ def test_find_single_file(tmp_path, test_paths):
     with pytest.raises(ValueError, match="Found no files matching criteria"):
         ff.find_single_file(a="a3")
 
-    expected = {"filename": {0: str(tmp_path / "a1/foo/file")}, "a": {0: "a1"}}
-    expected = pd.DataFrame.from_dict(expected)
+    expected = {"path": {0: str(tmp_path / "a1/foo/file")}, "a": {0: "a1"}}
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
 
     result = ff.find_single_file(a="a1")
     pd.testing.assert_frame_equal(result.df, expected)
@@ -527,8 +527,8 @@ def test_find_paths_scalar_number():
         path_pattern="{path}", file_pattern="{file}", test_paths=["1/1", "2/2"]
     )
 
-    expected = {"filename": {0: "1/*"}, "path": {0: "1"}}
-    expected = pd.DataFrame.from_dict(expected)
+    index = pd.Index(["1/*"], name="path")
+    expected = pd.DataFrame(["1"], columns=["path"], index=index)
     result = ff.find_paths(path=1)
     pd.testing.assert_frame_equal(result.df, expected)
 
@@ -539,8 +539,8 @@ def test_find_files_scalar_number():
         path_pattern="{path}", file_pattern="{file}", test_paths=["1/1", "2/2"]
     )
 
-    expected = {"filename": {0: "1/1"}, "path": {0: "1"}, "file": {0: "1"}}
-    expected = pd.DataFrame.from_dict(expected)
+    index = pd.Index(["1/1"], name="path")
+    expected = pd.DataFrame([["1", "1"]], columns=["path", "file"], index=index)
     result = ff.find_files(file=1)
     pd.testing.assert_frame_equal(result.df, expected)
 
@@ -554,7 +554,7 @@ def test_find_unparsable():
     ):
         ff.find_files()
 
-    expected = pd.DataFrame(list(), columns=["filename", "cat"])
+    expected = pd.DataFrame([], columns=["cat"], index=pd.Index([], name="path"))
 
     with pytest.warns(match="Could not parse 'a/b' with the pattern '{cat}/{cat}'"):
         result = ff.find_files(on_parse_error="warn")
@@ -564,8 +564,8 @@ def test_find_unparsable():
     pd.testing.assert_frame_equal(result.df, expected)
 
     ff = FileFinder("{cat}", "{cat}", test_paths=["a/b", "a/a"])
-    expected = {"filename": {0: "a/a"}, "cat": {0: "a"}}
-    expected = pd.DataFrame.from_dict(expected)
+    expected = {"path": {0: "a/a"}, "cat": {0: "a"}}
+    expected = pd.DataFrame.from_dict(expected).set_index("path")
     result = ff.find_files(on_parse_error="ignore")
     pd.testing.assert_frame_equal(result.df, expected)
 

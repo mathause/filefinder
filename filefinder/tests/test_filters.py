@@ -31,7 +31,7 @@ def test_priority_filter_simple():
     )
 
     expected = pd.DataFrame.from_records(
-        [("a", "h"), ("b", "h"), ("c", "d")], columns=("model", "res")
+        [("a", "h"), ("b", "h"), ("c", "d")], columns=("model", "res"), index=(1, 2, 4)
     )
 
     result = priority_filter(df, "res", ["h", "d"])
@@ -46,7 +46,7 @@ def test_priority_filter_missing():
     )
 
     expected = pd.DataFrame.from_records(
-        [("a", "h"), ("b", "d")], columns=("model", "res")
+        [("a", "h"), ("b", "d")], columns=("model", "res"), index=(1, 2)
     )
 
     with pytest.raises(
@@ -96,10 +96,7 @@ def test_priority_filter_multi():
         columns=("model", "number", "res"),
     )
 
-    expected = pd.DataFrame.from_records(
-        [("a", 1, "h"), ("a", 2, "d"), ("b", 1, "h")],
-        columns=("model", "number", "res"),
-    )
+    expected = df.iloc[[2, 1, 3]]
 
     result = priority_filter(df, "res", ["h", "d"])
 
@@ -122,6 +119,8 @@ def test_priority_filter_groupby():
         [("a", 2, "h"), ("b", 1, "h")], columns=("model", "number", "res")
     )
     result = priority_filter(df, "res", ["h", "d"], groupby=["model"])
+
+    result = result.reset_index(drop=True)
     pd.testing.assert_frame_equal(result, expected)
 
 
@@ -135,13 +134,13 @@ def test_priority_filter_filename():
             ("file4", "b", "d"),
             ("file5", "c", "d"),
         ],
-        columns=("filename", "model", "res"),
-    )
+        columns=("path", "model", "res"),
+    ).set_index("path")
 
     expected = pd.DataFrame.from_records(
         [("file2", "a", "h"), ("file3", "b", "h"), ("file5", "c", "d")],
-        columns=("filename", "model", "res"),
-    )
+        columns=("path", "model", "res"),
+    ).set_index("path")
 
     result = priority_filter(df, "res", ["h", "d"])
 
@@ -158,15 +157,15 @@ def test_priority_filter_filecontainer_simple():
             ("file4", "b", "d"),
             ("file5", "c", "d"),
         ],
-        columns=("filename", "model", "res"),
-    )
+        columns=("path", "model", "res"),
+    ).set_index("path")
 
     fc = FileContainer(df)
 
     expected = pd.DataFrame.from_records(
         [("file2", "a", "h"), ("file3", "b", "h"), ("file5", "c", "d")],
-        columns=("filename", "model", "res"),
-    )
+        columns=("path", "model", "res"),
+    ).set_index("path")
 
     result = priority_filter(fc, "res", ["h", "d"])
 

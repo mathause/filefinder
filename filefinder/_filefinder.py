@@ -199,7 +199,7 @@ class _Finder(_FinderBase):
 
     def _parse_paths(self, paths, on_parse_error):
 
-        out = list()
+        valid_paths, out = list(), list()
         for path in paths:
             parsed = self.parser.parse(path)
 
@@ -217,11 +217,11 @@ class _Finder(_FinderBase):
                 elif on_parse_error == "ignore":
                     pass
             else:
-                out.append([path + self._suffix] + list(parsed.named.values()))
+                valid_paths.append(path)
+                out.append(list(parsed.named.values()))
 
-        keys = ["filename"] + list(self.keys)
-
-        df = pd.DataFrame(out, columns=keys)
+        index = pd.Index(valid_paths, name="path") + self._suffix
+        df = pd.DataFrame(out, columns=self.keys, index=index)
         return df
 
 
@@ -550,14 +550,14 @@ class FileFinder:
 class FileContainer:
     """docstring for FileContainer"""
 
-    def __init__(self, df):
+    def __init__(self, df: pd.DataFrame):
 
         self.df = df
 
     def __iter__(self):
 
         for index, element in self.df.iterrows():
-            yield element["filename"], element.drop("filename").to_dict()
+            yield index, element.to_dict()
 
     def __getitem__(self, key):
 
@@ -565,7 +565,7 @@ class FileContainer:
             # use iloc -> there can be more than one element with index 0
             element = self.df.iloc[key]
 
-            return element["filename"], element.drop("filename").to_dict()
+            return element.name, element.to_dict()
         # assume slice or [1]
         else:
             ret = copy.copy(self)
@@ -576,7 +576,7 @@ class FileContainer:
         """combine columns"""
 
         if keys is None:
-            keys = list(self.df.columns.drop("filename"))
+            keys = list(self.df.columns)
 
         return self.df[list(keys)].apply(lambda x: sep.join(x.map(str)), axis=1)
 
@@ -588,7 +588,9 @@ class FileContainer:
 
     def _get_subset(self, **query):
         if not query:
-            return pd.DataFrame(columns=self.df.columns)
+            return pd.DataFrame(
+                [], columns=self.df.columns, index=pd.Index([], name="path")
+            )
         condition = np.ones(len(self.df), dtype=bool)
         for key, val in query.items():
             if isinstance(val, list):
