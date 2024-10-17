@@ -80,24 +80,30 @@ def test_filecontainer_search(example_df, example_fc):
     pd.testing.assert_frame_equal(result.df, expected)
 
 
+def test_fc_combine_by_key_deprecated(example_fc):
+
+    with pytest.warns(FutureWarning, match="`combine_by_key` has been deprecated"):
+        example_fc[[0]].combine_by_key()
+
+
 def test_fc_combine_by_keys(example_fc):
 
-    result = example_fc[[0]].combine_by_key()
+    result = example_fc[[0]]._combine_by_keys()
 
     # create one manually
     expected = pd.Series(["a.d.r"], index=pd.Index(["file0"], name="path"))
     pd.testing.assert_series_equal(result, expected)
 
-    result = example_fc.combine_by_key()
+    result = example_fc._combine_by_keys()
     expected = map(".".join, example_fc.df.values)
     expected = pd.Series(expected, index=example_fc.df.index)
 
     # different sep
-    result = example_fc.combine_by_key(sep="|")
+    result = example_fc._combine_by_keys(sep="|")
     expected = map("|".join, example_fc.df.values)
     expected = pd.Series(expected, index=example_fc.df.index)
 
     # not all columns
-    result = example_fc.combine_by_key(keys=("model", "res"))
+    result = example_fc._combine_by_keys(keys=("model", "res"))
     expected = map(".".join, example_fc.df[["model", "res"]].values)
     expected = pd.Series(expected, index=example_fc.df.index)

@@ -38,14 +38,15 @@ def create_ensnumber(filelist, keys=None):
     if keys is None:
         keys = ("exp", "table", "varn", "model")
 
+    keys = list(keys)
     df = filelist.df
-    combined = filelist.combine_by_key(keys)
+    multiindex = pd.MultiIndex.from_frame(df[keys])
 
     df["ensnumber"] = -1
 
-    for comb in combined.unique():
+    for idx in multiindex.unique():
 
-        sel = combined == comb
+        sel = multiindex == idx
         numbers = list(range(sel.sum()))
         df.loc[sel, "ensnumber"] = numbers
 

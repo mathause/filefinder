@@ -18,6 +18,7 @@
 
   - Renamed the `"filename"` column to `"path"` and made it a `pd.Index`, thus removing
     this column from the underlying `DataFrame` ([#113](https://github.com/mathause/filefinder/pull/113)).
+  - Deprecated `combine_by_key` ([#115](https://github.com/mathause/filefinder/pull/115)).
 
 - Explicitly test on python 3.13 ([#103](https://github.com/mathause/filefinder/pull/103)).
 - Drop support for python 3.9 ([#102](https://github.com/mathause/filefinder/pull/102)).
