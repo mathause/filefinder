@@ -11,6 +11,8 @@
   longer be passed by position ([#99](https://github.com/mathause/filefinder/pull/99)).
 - `FileFinder` now raises an error if an invalid `"{placeholder}"` is used
    ([#99](https://github.com/mathause/filefinder/pull/99)).
+- An empty `FileContainer` is returned instead of an empty list when no files/ paths are
+  found ([#114](https://github.com/mathause/filefinder/pull/114))
 
 - Changes to `FileContainer`:
 

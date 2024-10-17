@@ -6,6 +6,8 @@ import pytest
 
 from filefinder import FileFinder
 
+from . import assert_filecontainer_empty
+
 
 @pytest.fixture(scope="module")
 def tmp_path(tmp_path_factory):
@@ -212,10 +214,10 @@ def test_find_path_none_found(tmp_path, test_paths):
         ff.find_paths({"a": "foo"})
 
     result = ff.find_paths(a="foo", _allow_empty=True)
-    assert result == []
+    assert_filecontainer_empty(result, columns="a")
 
     result = ff.find_paths({"a": "foo"}, _allow_empty=True)
-    assert result == []
+    assert_filecontainer_empty(result, columns="a")
 
 
 def test_find_paths_simple(tmp_path, test_paths):
@@ -370,13 +372,13 @@ def test_find_file_none_found(tmp_path, test_paths):
         ff.find_files({"a": "XXX"})
 
     result = ff.find_files(a="XXX", _allow_empty=True)
-    assert result == []
+    assert_filecontainer_empty(result, columns=("a", "file_pattern"))
 
     result = ff.find_files({"a": "XXX"}, _allow_empty=True)
-    assert result == []
+    assert_filecontainer_empty(result, columns=("a", "file_pattern"))
 
     result = ff.find_files({"a": "XXX"}, _allow_empty=True, a="XXX")
-    assert result == []
+    assert_filecontainer_empty(result, columns=("a", "file_pattern"))
 
 
 def test_find_file_simple(tmp_path, test_paths):

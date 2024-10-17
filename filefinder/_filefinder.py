@@ -130,15 +130,13 @@ class _Finder(_FinderBase):
 
             all_patterns.append(full_pattern)
 
-        if all_paths:
-            df = self._parse_paths(all_paths, on_parse_error=on_parse_error)
-        elif _allow_empty:
-            return []
-        else:
+        if len(all_paths) == 0 and not _allow_empty:
             msg = "Found no files matching criteria. Tried the following pattern(s):"
             msg += "".join(f"\n- '{pattern}'" for pattern in all_patterns)
             raise ValueError(msg)
 
+        # NOTE: also creates the correct (empty) df if no paths are found
+        df = self._parse_paths(all_paths, on_parse_error=on_parse_error)
         fc = FileContainer(df)
 
         len_all = len(fc.df)
