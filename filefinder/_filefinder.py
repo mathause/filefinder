@@ -579,6 +579,14 @@ class FileContainer:
             ret.df = self.df.iloc[key]
             return ret
 
+    @property
+    def meta(self) -> list[dict]:
+        return self.df.to_dict("records")
+
+    @property
+    def paths(self) -> list[str]:
+        return self.df.index.to_list()
+
     def combine_by_key(self, keys=None, sep="."):
         warnings.warn(
             "`combine_by_key` has been deprecated and will be removed in a future version",
