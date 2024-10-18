@@ -589,27 +589,38 @@ class FileContainer:
         return self.df[list(keys)].apply(lambda x: sep.join(x.map(str)), axis=1)
 
     def search(self, **query):
+        """subset paths given a search query
 
-        ret = copy.copy(self)
-        ret.df = self._get_subset(**query)
-        return ret
+        Parameters
+        ----------
+        **query: Mapping[str, str | int | list[str | int]]
+            Search query.
+
+        Notes
+        -----
+        - individual conditions are combined with "and", e.g., ``model="a", exp="b"``
+          requires the model to be "a" and the experiment to be "b".
+        - conditions for a key are combined with "or", e.g., ``model=["a", "b"]``
+          matches for both.
+        """
+
+        df = self._get_subset(**query)
+        return type(self)(df)
 
     def _get_subset(self, **query):
         if not query:
             return pd.DataFrame(
                 [], columns=self.df.columns, index=pd.Index([], name="path")
             )
-        condition = np.ones(len(self.df), dtype=bool)
-        for key, val in query.items():
-            if isinstance(val, list):
-                condition_i = np.zeros(len(self.df), dtype=bool)
-                for val_i in val:
-                    condition_i = condition_i | (self.df[key] == val_i)
-                condition = condition & condition_i
-            elif val is not None:
-                condition = condition & (self.df[key] == val)
-        query_results = self.df.loc[condition]
-        return query_results
+
+        sel = True
+        for key, value in query.items():
+            # isin does not handle scalars
+            value = [value] if np.ndim(value) == 0 else value
+
+            sel &= self.df[key].isin(value)
+
+        return self.df[sel]
 
     def __len__(self):
         return self.df.__len__()

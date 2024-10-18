@@ -3,6 +3,8 @@ import pytest
 
 from filefinder import FileContainer
 
+from . import assert_filecontainer_empty
+
 
 @pytest.fixture
 def example_df():
@@ -60,8 +62,12 @@ def test_fc_iter(example_df, example_fc):
 
 def test_filecontainer_search(example_df, example_fc):
 
-    assert len(example_fc.search()) == 0
-    assert len(example_fc.search(model="d")) == 0
+    with pytest.raises(KeyError):
+        example_fc.search(not_in_example_fc="a")
+
+    assert_filecontainer_empty(example_fc.search())
+    assert_filecontainer_empty(example_fc.search(model="d"))
+    assert_filecontainer_empty(example_fc.search(model=0))
 
     result = example_fc.search(model="a")
     expected = example_df.iloc[[0, 1]]
@@ -76,6 +82,11 @@ def test_filecontainer_search(example_df, example_fc):
     pd.testing.assert_frame_equal(result.df, expected)
 
     result = example_fc.search(model=["a", "b"], scen="d")
+    expected = example_df.iloc[[0, 3]]
+    pd.testing.assert_frame_equal(result.df, expected)
+
+    # check if a tuple is accepted
+    result = example_fc.search(model=("a", "b"), scen="d")
     expected = example_df.iloc[[0, 3]]
     pd.testing.assert_frame_equal(result.df, expected)
 
