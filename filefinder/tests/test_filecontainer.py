@@ -60,6 +60,26 @@ def test_fc_iter(example_df, example_fc):
     assert result == expected
 
 
+def test_fc_getitem(example_df, example_fc):
+
+    # indexing by scalar currently returns path, meta (analog to the loop)
+    # not sure if this is the best way but keep for now
+    path, meta = example_fc[0]
+    assert path == "file0"
+    assert meta == {"model": "a", "scen": "d", "res": "r"}
+
+    path, meta = example_fc[-1]
+    assert path == "file4"
+    assert meta == {"model": "c", "scen": "d", "res": "r"}
+
+    result = example_fc[0:1]
+    assert isinstance(result, FileContainer)
+    pd.testing.assert_frame_equal(result.df, example_df.iloc[0:1])
+
+    result = example_fc[0:0]
+    assert_filecontainer_empty(result, columns=["model", "scen", "res"])
+
+
 def test_filecontainer_search(example_df, example_fc):
 
     with pytest.raises(KeyError):
