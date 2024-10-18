@@ -279,6 +279,8 @@ class FileFinder:
         if isinstance(test_paths, str):
             test_paths = [test_paths]
 
+        self._test_paths = test_paths
+
         # use fnmatch.filter to 'glob' pseudo-filenames
         def finder(pat):
 

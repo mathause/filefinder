@@ -97,6 +97,20 @@ def test_pattern_property():
     assert ff.full.pattern == path_pattern + file_pattern
 
 
+def test_test_path_property():
+
+    ff = FileFinder("a", "b")
+
+    with pytest.raises(AttributeError):
+        ff._test_paths
+
+    ff = FileFinder("a", "b", test_paths="path")
+    assert ff._test_paths == ["path"]
+
+    ff = FileFinder("a", "b", test_paths=["a", "b"])
+    assert ff._test_paths == ["a", "b"]
+
+
 def test_file_pattern_no_sep():
 
     path_pattern = "path_pattern"
