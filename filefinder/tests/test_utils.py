@@ -1,6 +1,6 @@
 import pytest
 
-from filefinder.utils import (
+from filefinder._utils import (
     _find_keys,
     atoi,
     natural_keys,

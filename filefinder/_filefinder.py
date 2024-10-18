@@ -10,7 +10,12 @@ import numpy as np
 import pandas as pd
 import parse
 
-from .utils import _find_keys, natural_keys, product_dict, update_dict_with_kwargs
+from filefinder._utils import (
+    _find_keys,
+    natural_keys,
+    product_dict,
+    update_dict_with_kwargs,
+)
 
 logger = logging.getLogger(__name__)
 
