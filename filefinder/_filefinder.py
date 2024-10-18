@@ -31,6 +31,17 @@ def _assert_valid_keys(keys):
             raise ValueError(f"'{key}' is not a valid placeholder")
 
 
+def _assert_unique(df):
+
+    duplicates = df.duplicated()
+
+    if duplicates.any():
+        duplicated = df[duplicates].head()
+        msg = f"Non-unique metadata detected.\nFirst five duplicates:\n{duplicated}"
+
+        raise ValueError(msg)
+
+
 class _FinderBase:
     def __init__(self, pattern, suffix=""):
 
@@ -137,18 +148,9 @@ class _Finder(_FinderBase):
 
         # NOTE: also creates the correct (empty) df if no paths are found
         df = self._parse_paths(all_paths, on_parse_error=on_parse_error)
-        fc = FileContainer(df)
+        _assert_unique(df)
 
-        len_all = len(fc.df)
-        len_unique = len(fc.combine_by_key().unique())
-
-        if len_all != len_unique:
-            duplicated = fc.df[fc.df.duplicated()]
-            msg = f"This query leads to non-unique metadata. Please adjust your query.\nFirst five duplicates:\n{duplicated.head()}"
-
-            raise ValueError(msg)
-
-        return fc
+        return FileContainer(df)
 
     def find_single(self, keys=None, **keys_kwargs):
         """
@@ -571,6 +573,14 @@ class FileContainer:
             return ret
 
     def combine_by_key(self, keys=None, sep="."):
+        warnings.warn(
+            "`combine_by_key` has been deprecated and will be removed in a future version",
+            FutureWarning,
+        )
+
+        return self._combine_by_keys(keys=keys, sep=sep)
+
+    def _combine_by_keys(self, keys=None, sep="."):
         """combine columns"""
 
         if keys is None:

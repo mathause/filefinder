@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 from filefinder import FileFinder
+from filefinder._filefinder import _assert_unique
 
 from . import assert_filecontainer_empty
 
@@ -65,6 +66,17 @@ def test_only_named_fields(pattern):
 
     with pytest.raises(ValueError, match="Only named fields are currently allowed"):
         FileFinder(pattern, "")
+
+
+def test_assert_unique():
+
+    # no error raised
+    df = pd.DataFrame.from_records([("a", "d"), ("a", "h")], columns=("model", "res"))
+    _assert_unique(df)
+
+    df = pd.DataFrame.from_records([("a", "d"), ("a", "d")], columns=("model", "res"))
+    with pytest.raises(ValueError, match="Non-unique metadata detected"):
+        _assert_unique(df)
 
 
 def test_pattern_property():
@@ -218,6 +230,16 @@ def test_find_path_none_found(tmp_path, test_paths):
 
     result = ff.find_paths({"a": "foo"}, _allow_empty=True)
     assert_filecontainer_empty(result, columns="a")
+
+
+def test_find_paths_non_unique():
+
+    # test raises error for non-unique metadata - AFAIK not possible for real paths
+
+    ff = FileFinder("{cat}", "", test_paths=["a/", "a/"])
+
+    with pytest.raises(ValueError, match="Non-unique metadata detected"):
+        ff.find_paths()
 
 
 def test_find_paths_simple(tmp_path, test_paths):
@@ -379,6 +401,16 @@ def test_find_file_none_found(tmp_path, test_paths):
 
     result = ff.find_files({"a": "XXX"}, _allow_empty=True, a="XXX")
     assert_filecontainer_empty(result, columns=("a", "file_pattern"))
+
+
+def test_find_files_non_unique():
+
+    # test raises error for non-unique metadata - AFAIK not possible for real paths
+
+    ff = FileFinder("", "{cat}", test_paths=["/a", "/a"])
+
+    with pytest.raises(ValueError, match="Non-unique metadata detected"):
+        ff.find_files()
 
 
 def test_find_file_simple(tmp_path, test_paths):
