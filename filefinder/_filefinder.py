@@ -616,5 +616,7 @@ class FileContainer:
 
     def __repr__(self):
 
-        msg = "<FileContainer>\n"
+        n_paths = len(self)
+
+        msg = f"<FileContainer: {n_paths} paths>\n"
         return msg + self.df.__repr__()

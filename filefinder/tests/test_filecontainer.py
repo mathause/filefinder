@@ -107,3 +107,14 @@ def test_fc_combine_by_keys(example_fc):
     result = example_fc._combine_by_keys(keys=("model", "res"))
     expected = map(".".join, example_fc.df[["model", "res"]].values)
     expected = pd.Series(expected, index=example_fc.df.index)
+
+
+def test_filefinder_repr(example_fc):
+
+    # NOTE: does not test the pd.DataFrame part of the repr
+
+    df = pd.DataFrame([], columns=["cat"], index=pd.Index([], name="path"))
+    fc = FileContainer(df)
+    assert fc.__repr__().startswith("<FileContainer: 0 paths>")
+
+    assert example_fc.__repr__().startswith("<FileContainer: 5 paths>")
