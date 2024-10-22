@@ -231,31 +231,32 @@ class _Finder(_FinderBase):
 
 
 class FileFinder:
-    """find and create file names based on python format syntax
-
-    Parameters
-    ----------
-    path_pattern : str
-        String denoting the path (folder) pattern where everything variable is enclosed
-        in curly braces.
-    file_pattern : str
-        String denoting the file pattern where everything variable is enclosed in curly
-        braces.
-    test_paths : list of str, default None
-        A list of paths to use instead of querying the file system. To be used for
-        testing and demonstration.
-
-    Examples
-    --------
-    >>> path_pattern = "/root/{category}"
-    >>> file_pattern = "{category}_file_{number}"
-
-    >>> ff = FileFinder(path_pattern, file_pattern)
-    """
 
     def __init__(
         self, path_pattern: str, file_pattern: str, *, test_paths=None
     ) -> None:
+        """find and create file names based on python format syntax
+
+        Parameters
+        ----------
+        path_pattern : str
+            String denoting the path (folder) pattern where everything variable is
+            enclosed in curly braces.
+        file_pattern : str
+            String denoting the file pattern where everything variable is enclosed in
+            curly braces.
+        test_paths : list of str, default None
+            A list of paths to use instead of querying the file system. To be used for
+            testing and demonstration.
+
+        Examples
+        --------
+        >>> path_pattern = "/root/{category}"
+        >>> file_pattern = "{category}_file_{number}"
+
+        >>> ff = FileFinder(path_pattern, file_pattern)
+        """
+
 
         if os.path.sep in file_pattern:
             raise ValueError(
@@ -555,9 +556,16 @@ class FileFinder:
 
 
 class FileContainer:
-    """docstring for FileContainer"""
+
 
     def __init__(self, df: pd.DataFrame):
+        """FileContainer gathers paths and their metadata
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame with info about found paths from FileFinder.
+        """
 
         self.df = df
 
