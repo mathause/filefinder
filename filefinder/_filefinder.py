@@ -29,14 +29,14 @@ keys: {repr_keys}
 _RESERVED_PLACEHOLDERS = {"keys", "on_parse_error", "_allow_empty"}
 
 
-def _assert_valid_keys(keys):
+def _assert_valid_keys(keys) -> None:
 
     for key in _RESERVED_PLACEHOLDERS:
         if key in keys:
             raise ValueError(f"'{key}' is not a valid placeholder")
 
 
-def _assert_unique(df):
+def _assert_unique(df) -> None:
 
     duplicates = df.duplicated()
 
@@ -69,7 +69,7 @@ class _FinderBase:
             r"\{([A-Za-z0-9_]+)(:.*?)\}", r"{\1}", pattern
         )
 
-    def create_name(self, keys=None, **keys_kwargs):
+    def create_name(self, keys=None, **keys_kwargs) -> str:
         """build name from keys
 
         Parameters
@@ -97,7 +97,7 @@ class _Finder(_FinderBase):
 
     def find(
         self, keys=None, *, on_parse_error="raise", _allow_empty=False, **keys_kwargs
-    ):
+    ) -> "FileContainer":
         """find files in the file system using the file and path (folder) pattern
 
         Parameters
@@ -157,7 +157,7 @@ class _Finder(_FinderBase):
 
         return FileContainer(df)
 
-    def find_single(self, keys=None, **keys_kwargs):
+    def find_single(self, keys=None, **keys_kwargs) -> "FileContainer":
         """
         find exactly one file/ path in the file system using the file and path pattern
 
@@ -191,7 +191,7 @@ class _Finder(_FinderBase):
         return fc
 
     @staticmethod
-    def _glob(pattern):
+    def _glob(pattern) -> list[str]:
         """Return a list of paths matching a pathname pattern
 
         Notes
@@ -202,7 +202,7 @@ class _Finder(_FinderBase):
 
         return glob.glob(pattern)
 
-    def _parse_paths(self, paths, on_parse_error):
+    def _parse_paths(self, paths, on_parse_error) -> pd.DataFrame:
 
         valid_paths, out = list(), list()
         for path in paths:
@@ -257,7 +257,6 @@ class FileFinder:
         >>> ff = FileFinder(path_pattern, file_pattern)
         """
 
-
         if os.path.sep in file_pattern:
             raise ValueError(
                 f"`file_pattern` cannot contain path separator ('{os.path.sep}')"
@@ -302,7 +301,7 @@ class FileFinder:
         self.path._glob = finder
         self.full._glob = finder
 
-    def create_path_name(self, keys=None, **keys_kwargs):
+    def create_path_name(self, keys=None, **keys_kwargs) -> str:
         """build path (folder) name from keys
 
         Parameters
@@ -332,7 +331,7 @@ class FileFinder:
         # warnings.warn("'create_path_name' is deprecated, use 'path.name' instead")
         return self.path.create_name(keys, **keys_kwargs)
 
-    def create_file_name(self, keys=None, **keys_kwargs):
+    def create_file_name(self, keys=None, **keys_kwargs) -> str:
         """build file name from keys
 
         Parameters
@@ -362,7 +361,7 @@ class FileFinder:
         # warnings.warn("'create_file_name' is deprecated, use 'file.name' instead")
         return self.file.create_name(keys, **keys_kwargs)
 
-    def create_full_name(self, keys=None, **keys_kwargs):
+    def create_full_name(self, keys=None, **keys_kwargs) -> str:
         """build full (folder + file) name from keys
 
         Parameters
@@ -394,7 +393,7 @@ class FileFinder:
 
     def find_paths(
         self, keys=None, *, on_parse_error="raise", _allow_empty=False, **keys_kwargs
-    ):
+    ) -> "FileContainer":
         """find files in the file system using the file and path (folder) pattern
 
         Parameters
@@ -444,7 +443,7 @@ class FileFinder:
 
     def find_files(
         self, keys=None, *, on_parse_error="raise", _allow_empty=False, **keys_kwargs
-    ):
+    ) -> "FileContainer":
         """find files in the file system using the file pattern
 
         Parameters
@@ -495,7 +494,7 @@ class FileFinder:
             **keys_kwargs,
         )
 
-    def find_single_path(self, keys=None, **keys_kwargs):
+    def find_single_path(self, keys=None, **keys_kwargs) -> "FileContainer":
         """
         find exactly one path in the file system using the path pattern
 
@@ -518,7 +517,7 @@ class FileFinder:
 
         return self.path.find_single(keys, **keys_kwargs)
 
-    def find_single_file(self, keys=None, **keys_kwargs):
+    def find_single_file(self, keys=None, **keys_kwargs) -> "FileContainer":
         """
         find exactly one file in the file system using the file and path pattern
 
@@ -541,7 +540,7 @@ class FileFinder:
 
         return self.full.find_single(keys, **keys_kwargs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
 
         repr_keys = "', '".join(sorted(self.full.keys))
         repr_keys = f"'{repr_keys}'"
@@ -556,7 +555,6 @@ class FileFinder:
 
 
 class FileContainer:
-
 
     def __init__(self, df: pd.DataFrame):
         """FileContainer gathers paths and their metadata
