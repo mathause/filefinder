@@ -79,6 +79,29 @@ def test_assert_unique():
         _assert_unique(df)
 
 
+@pytest.mark.parametrize("_allow_empty", (False, True))
+def test_deprecate_allow_empty(_allow_empty):
+
+    ff = FileFinder("", "a")
+    msg = "`_allow_empty` has been deprecated in favour of `on_empty`"
+    with pytest.raises(TypeError, match=msg):
+        ff.find_files(_allow_empty=_allow_empty)
+
+    with pytest.raises(TypeError, match=msg):
+        ff.find_paths(_allow_empty=_allow_empty)
+
+
+def test_wrong_on_empty():
+
+    ff = FileFinder("", "a")
+    msg = "Unknown value for 'on_empty': 'null'. Must be one of 'raise', 'warn' or 'allow'."
+    with pytest.raises(ValueError, match=msg):
+        ff.find_paths(on_empty="null")
+
+    with pytest.raises(ValueError, match=msg):
+        ff.find_files(on_empty="null")
+
+
 def test_pattern_property():
 
     path_pattern = "path_pattern/"
@@ -239,10 +262,18 @@ def test_find_path_none_found(tmp_path, test_paths):
     with pytest.raises(ValueError, match="Found no files matching criteria"):
         ff.find_paths({"a": "foo"})
 
-    result = ff.find_paths(a="foo", _allow_empty=True)
+    with pytest.warns(match="Found no files matching criteria"):
+        result = ff.find_paths(a="foo", on_empty="warn")
     assert_filecontainer_empty(result, columns="a")
 
-    result = ff.find_paths({"a": "foo"}, _allow_empty=True)
+    with pytest.warns(match="Found no files matching criteria"):
+        result = ff.find_paths({"a": "foo"}, on_empty="warn")
+    assert_filecontainer_empty(result, columns="a")
+
+    result = ff.find_paths(a="foo", on_empty="allow")
+    assert_filecontainer_empty(result, columns="a")
+
+    result = ff.find_paths({"a": "foo"}, on_empty="allow")
     assert_filecontainer_empty(result, columns="a")
 
 
@@ -407,13 +438,21 @@ def test_find_file_none_found(tmp_path, test_paths):
     with pytest.raises(ValueError, match="Found no files matching criteria"):
         ff.find_files({"a": "XXX"})
 
-    result = ff.find_files(a="XXX", _allow_empty=True)
+    with pytest.warns(match="Found no files matching criteria"):
+        result = ff.find_files(a="XXX", on_empty="warn")
     assert_filecontainer_empty(result, columns=("a", "file_pattern"))
 
-    result = ff.find_files({"a": "XXX"}, _allow_empty=True)
+    with pytest.warns(match="Found no files matching criteria"):
+        result = ff.find_files({"a": "XXX"}, on_empty="warn")
     assert_filecontainer_empty(result, columns=("a", "file_pattern"))
 
-    result = ff.find_files({"a": "XXX"}, _allow_empty=True, a="XXX")
+    result = ff.find_files(a="XXX", on_empty="allow")
+    assert_filecontainer_empty(result, columns=("a", "file_pattern"))
+
+    result = ff.find_files({"a": "XXX"}, on_empty="allow")
+    assert_filecontainer_empty(result, columns=("a", "file_pattern"))
+
+    result = ff.find_files({"a": "XXX"}, on_empty="allow", a="XXX")
     assert_filecontainer_empty(result, columns=("a", "file_pattern"))
 
 
