@@ -14,6 +14,14 @@
 - An empty `FileContainer` is returned instead of an empty list when no files/ paths are
   found ([#114](https://github.com/mathause/filefinder/pull/114))
 
+- Define and test the minimum supported versions of the dependencies ([#125](https://github.com/mathause/filefinder/pull/125)).
+
+  | Package    | Old     | New    |
+  | ---------- | ------- | ------ |
+  | numpy      | undefined | 1.24 |
+  | pandas     | undefined |  2.0 |
+  | parse      | undefined | 1.19 |
+
 - Changes to `FileContainer`:
 
   - Renamed the `"filename"` column to `"path"` and made it a `pd.Index`, thus removing
