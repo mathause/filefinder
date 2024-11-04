@@ -26,7 +26,16 @@ file_pattern: '{file_pattern}'
 keys: {repr_keys}
 """
 
-_RESERVED_PLACEHOLDERS = {"keys", "on_parse_error", "_allow_empty"}
+
+def _deprecate_allow_empty(**kwargs):
+
+    _allow_empty = kwargs.get("_allow_empty")
+
+    if _allow_empty is not None:
+        raise TypeError("`_allow_empty` has been deprecated in favour of `on_empty`")
+
+
+_RESERVED_PLACEHOLDERS = {"keys", "on_parse_error", "on_empty", "_allow_empty"}
 
 
 def _assert_valid_keys(keys) -> None:
@@ -96,7 +105,7 @@ class _Finder(_FinderBase):
         return cond_dict
 
     def find(
-        self, keys=None, *, on_parse_error="raise", _allow_empty=False, **keys_kwargs
+        self, keys=None, *, on_parse_error="raise", on_empty="raise", **keys_kwargs
     ) -> "FileContainer":
         """find files in the file system using the file and path (folder) pattern
 
@@ -108,8 +117,9 @@ class _Finder(_FinderBase):
         on_parse_error : "raise" | "warn" | "ignore", default: "raise"
             What to do if a path/file name cannot be parsed. If "raise" raises a ValueError,
             if "warn" raises a warning and if "ignore" ignores the file.
-        _allow_empty : bool, default: False
-            If False (default) raises an error if no files are found. If True returns
+        on_empty : "raise" | "warn" | "allow", default: "raise"
+            Behaviour when no files are found: "raise" (default) raises a ValueError,
+            "warn" raises a warning. For "warn" and "allow" an empty FileContainer is returned.
             an empty list.
         **keys_kwargs : {key: indexer, ...}, optional
             The keyword arguments form of ``keys``. When the same key is passed in
@@ -121,11 +131,18 @@ class _Finder(_FinderBase):
 
         """
 
+        _deprecate_allow_empty(**keys_kwargs)
+
         keys = update_dict_with_kwargs(keys, **keys_kwargs)
 
-        if on_parse_error not in ["raise", "warn", "ignore"]:
+        if on_parse_error not in ("raise", "warn", "ignore"):
             raise ValueError(
                 f"Unknown value for 'on_parse_error': '{on_parse_error}'. Must be one of 'raise', 'warn' or 'ignore'."
+            )
+
+        if on_empty not in ("raise", "warn", "allow"):
+            raise ValueError(
+                f"Unknown value for 'on_empty': '{on_empty}'. Must be one of 'raise', 'warn' or 'allow'."
             )
 
         # wrap strings and scalars in list
@@ -146,10 +163,15 @@ class _Finder(_FinderBase):
 
             all_patterns.append(full_pattern)
 
-        if len(all_paths) == 0 and not _allow_empty:
+        if len(all_paths) == 0:
             msg = "Found no files matching criteria. Tried the following pattern(s):"
             msg += "".join(f"\n- '{pattern}'" for pattern in all_patterns)
-            raise ValueError(msg)
+
+            if on_empty == "raise":
+                raise ValueError(msg)
+            elif on_empty == "warn":
+                # TODO: correct stack level
+                warnings.warn(msg)
 
         # NOTE: also creates the correct (empty) df if no paths are found
         df = self._parse_paths(all_paths, on_parse_error=on_parse_error)
@@ -178,7 +200,7 @@ class _Finder(_FinderBase):
         ValueError : if more or less than one file/ path is found
         """
 
-        fc = self.find(keys, on_parse_error="raise", _allow_empty=False, **keys_kwargs)
+        fc = self.find(keys, on_parse_error="raise", on_empty="raise", **keys_kwargs)
 
         if len(fc) > 1:
             n_found = len(fc)
@@ -392,7 +414,7 @@ class FileFinder:
         return self.full.create_name(keys, **keys_kwargs)
 
     def find_paths(
-        self, keys=None, *, on_parse_error="raise", _allow_empty=False, **keys_kwargs
+        self, keys=None, *, on_parse_error="raise", on_empty="raise", **keys_kwargs
     ) -> "FileContainer":
         """find files in the file system using the file and path (folder) pattern
 
@@ -404,9 +426,9 @@ class FileFinder:
         on_parse_error : "raise" | "warn" | "skip", default: "raise"
             What to do if a path/file name cannot be parsed. If "raise" raises a ValueError,
             if "warn" raises a warning and if "skip" ignores the file.
-        _allow_empty : bool, default: False
-            If False (default) raises an error if no files are found. If True returns
-            an empty list.
+        on_empty : "raise" | "warn" | "allow", default: "raise"
+            Behaviour when no files are found: "raise" (default) raises a ValueError,
+            "warn" raises a warning. For "warn" and "allow" an empty FileContainer is returned.
         **keys_kwargs : {key: indexer, ...}, optional
             The keyword arguments form of ``keys``. When the same key is passed in
             ``keys`` and ``keys_kwargs`` the latter takes priority.
@@ -437,12 +459,12 @@ class FileFinder:
         return self.path.find(
             keys,
             on_parse_error=on_parse_error,
-            _allow_empty=_allow_empty,
+            on_empty=on_empty,
             **keys_kwargs,
         )
 
     def find_files(
-        self, keys=None, *, on_parse_error="raise", _allow_empty=False, **keys_kwargs
+        self, keys=None, *, on_parse_error="raise", on_empty="raise", **keys_kwargs
     ) -> "FileContainer":
         """find files in the file system using the file pattern
 
@@ -454,9 +476,9 @@ class FileFinder:
         on_parse_error : "raise" | "warn" | "skip", default: "raise"
             What to do if a path/file name cannot be parsed. If "raise" raises a ValueError,
             if "warn" raises a warning and if "skip" ignores the file.
-        _allow_empty : bool, default: False
-            If False (default) raises an error if no files are found. If True returns
-            an empty list.
+        on_empty : "raise" | "warn" | "allow", default: "raise"
+            Behaviour when no files are found: "raise" (default) raises a ValueError,
+            "warn" raises a warning. For "warn" and "allow" an empty FileContainer is returned.
         **keys_kwargs : {key: indexer, ...}, optional
             The keyword arguments form of ``keys``. When the same key is passed in
             ``keys`` and ``keys_kwargs`` the latter takes priority.
@@ -490,7 +512,7 @@ class FileFinder:
         return self.full.find(
             keys,
             on_parse_error=on_parse_error,
-            _allow_empty=_allow_empty,
+            on_empty=on_empty,
             **keys_kwargs,
         )
 
