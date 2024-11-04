@@ -26,6 +26,8 @@
 
   - Renamed the `"filename"` column to `"path"` and made it a `pd.Index`, thus removing
     this column from the underlying `DataFrame` ([#113](https://github.com/mathause/filefinder/pull/113)).
+  - Added `meta` and `paths` properties to `FileContainer` which allow to iterate over them
+    ([#121](https://github.com/mathause/filefinder/pull/121)).
   - Deprecated `combine_by_key` ([#115](https://github.com/mathause/filefinder/pull/115)).
   - Added the number of paths to the repr ([#116](https://github.com/mathause/filefinder/pull/116)).
 

@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import warnings
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -606,6 +607,14 @@ class FileContainer:
             ret = copy.copy(self)
             ret.df = self.df.iloc[key]
             return ret
+
+    @property
+    def meta(self) -> list[dict[str, Any]]:
+        return self.df.to_dict("records")
+
+    @property
+    def paths(self) -> list[str]:
+        return self.df.index.to_list()
 
     def combine_by_key(self, keys=None, sep="."):
         warnings.warn(

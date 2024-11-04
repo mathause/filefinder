@@ -80,6 +80,35 @@ def test_fc_getitem(example_df, example_fc):
     assert_filecontainer_empty(result, columns=["model", "scen", "res"])
 
 
+def test_filecontainer_paths(example_fc):
+
+    result = example_fc.paths
+    expected = [
+        "file0",
+        "file1",
+        "file2",
+        "file3",
+        "file4",
+    ]
+
+    assert result == expected
+
+
+def test_filecontainer_meta(example_fc):
+
+    result = example_fc.meta
+
+    expected = [
+        {"model": "a", "scen": "d", "res": "r"},
+        {"model": "a", "scen": "h", "res": "r"},
+        {"model": "b", "scen": "h", "res": "r"},
+        {"model": "b", "scen": "d", "res": "r"},
+        {"model": "c", "scen": "d", "res": "r"},
+    ]
+
+    assert result == expected
+
+
 def test_filecontainer_search(example_df, example_fc):
 
     with pytest.raises(KeyError):
