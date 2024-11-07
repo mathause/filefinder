@@ -30,6 +30,7 @@
     ([#121](https://github.com/mathause/filefinder/pull/121)).
   - Deprecated `combine_by_key` ([#115](https://github.com/mathause/filefinder/pull/115)).
   - Added the number of paths to the repr ([#116](https://github.com/mathause/filefinder/pull/116)).
+  - Added capability to concat two `FileContainer`s ([#126](https://github.com/mathause/filefinder/pull/126)).
 
 - Explicitly test on python 3.13 ([#103](https://github.com/mathause/filefinder/pull/103)).
 - Drop support for python 3.9 ([#102](https://github.com/mathause/filefinder/pull/102)).

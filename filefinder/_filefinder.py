@@ -649,6 +649,42 @@ class FileContainer:
         df = self._get_subset(**query)
         return type(self)(df)
 
+    def concat(self, other, drop_duplicates=True):
+        """concatenate two FileContainers
+
+        Parameters
+        ----------
+        other : FileContainer
+            The other FileContainer to concatenate.
+        drop_duplicates : bool, default True
+            Drop duplicates after concatenating.
+
+        Returns
+        -------
+        FileContainer
+            The concatenated FileContainer.
+
+        Raises
+        ------
+        ValueError
+            If the other object is not a FileContainer.
+        ValueError
+            If the two FileContainers do not have the same keys.
+        """
+
+        if not isinstance(other, FileContainer):
+            raise ValueError("Can only concatenate two FileContainers.")
+
+        if self.df.columns is not other.df.columns:
+            raise ValueError("FileContainers must have the same keys.")
+
+        df = pd.concat([self.df, other.df])
+
+        if drop_duplicates:
+            df = df.drop_duplicates()
+
+        return type(self)(df)
+
     def _get_subset(self, **query):
         if not query:
             return pd.DataFrame(
