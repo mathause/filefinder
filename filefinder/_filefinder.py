@@ -1,4 +1,3 @@
-import copy
 import fnmatch
 import glob
 import logging
@@ -604,9 +603,8 @@ class FileContainer:
             return element.name, element.to_dict()
         # assume slice or [1]
         else:
-            ret = copy.copy(self)
-            ret.df = self.df.iloc[key]
-            return ret
+            df = self.df.iloc[key]
+            return type(self)(df)
 
     @property
     def meta(self) -> list[dict[str, Any]]:
