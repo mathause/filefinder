@@ -39,7 +39,7 @@ def test_empty_filecontainer():
     assert len(fc) == 0
 
     with pytest.raises(StopIteration):
-        next(iter(fc))
+        next(iter(fc.items()))
 
 
 def test_filecontainer(example_df, example_fc):
@@ -51,11 +51,30 @@ def test_filecontainer(example_df, example_fc):
 def test_fc_iter(example_df, example_fc):
 
     # test one manually
-    path, meta = next(iter(example_fc))
+    with pytest.warns(
+        FutureWarning, match="iterating over a `FileContainer` is deprecated"
+    ):
+        path, meta = next(iter(example_fc))
+
     assert path == "file0"
     assert meta == {"model": "a", "scen": "d", "res": "r"}
 
-    result = list(example_fc)
+    with pytest.warns(
+        FutureWarning, match="iterating over a `FileContainer` is deprecated"
+    ):
+        result = list(example_fc)
+    expected = list(zip(example_df.index.to_list(), example_df.to_dict("records")))
+    assert result == expected
+
+
+def test_fc_items(example_df, example_fc):
+
+    # test one manually
+    path, meta = next(iter(example_fc.items()))
+    assert path == "file0"
+    assert meta == {"model": "a", "scen": "d", "res": "r"}
+
+    result = list(example_fc.items())
     expected = list(zip(example_df.index.to_list(), example_df.to_dict("records")))
     assert result == expected
 

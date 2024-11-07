@@ -4,7 +4,7 @@ import logging
 import os
 import re
 import warnings
-from typing import Any
+from typing import Any, Generator
 
 import numpy as np
 import pandas as pd
@@ -591,6 +591,13 @@ class FileContainer:
 
     def __iter__(self):
 
+        warnings.warn(
+            "iterating over a `FileContainer` is deprecated. Use ``.paths``, ``.meta``"
+            " or ``.items() instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
+
         for index, element in self.df.iterrows():
             yield index, element.to_dict()
 
@@ -613,6 +620,10 @@ class FileContainer:
     @property
     def paths(self) -> list[str]:
         return self.df.index.to_list()
+
+    def items(self) -> Generator[tuple[str, dict[str, Any]], None, None]:
+        for index, element in self.df.iterrows():
+            yield index, element.to_dict()
 
     def combine_by_key(self, keys=None, sep="."):
         warnings.warn(

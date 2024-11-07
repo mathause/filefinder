@@ -28,7 +28,12 @@
     this column from the underlying `DataFrame` ([#113](https://github.com/mathause/filefinder/pull/113)).
   - Added `meta` and `paths` properties to `FileContainer` which allow to iterate over them
     ([#121](https://github.com/mathause/filefinder/pull/121)).
-  - Deprecated `combine_by_key` ([#115](https://github.com/mathause/filefinder/pull/115)).
+  - Added `items()` method to `FileContainer`, which iterates over `path, meta`
+    ([#128](https://github.com/mathause/filefinder/pull/128)).
+  - Deprecated iterating over `FileContainer`, use `.paths`, `.meta` or `items()` instead
+    ([#128](https://github.com/mathause/filefinder/pull/128)).
+  - Deprecated `combine_by_key`, create a `pd.MultiIndex` instead
+    ([#115](https://github.com/mathause/filefinder/pull/115)).
   - Added the number of paths to the repr ([#116](https://github.com/mathause/filefinder/pull/116)).
   - Added capability to concat two `FileContainer`s ([#126](https://github.com/mathause/filefinder/pull/126)).
 
