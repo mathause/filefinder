@@ -5,7 +5,7 @@ _Find and parse file and folder names._
 Define regular folder and file patterns with the intuitive python syntax:
 
 ```python
-from filefinder import FileFinder
+from filefisher import FileFinder
 
 path_pattern = "/root/{category}"
 file_pattern = "{category}_file_{number}"
@@ -31,7 +31,7 @@ ff.create_full_name(category="a", number=1)
 
 ## Find files on disk
 
-However, the strength of filefinder is parsing file names on disk. Assuming you have the
+However, the strength of filefisher is parsing file names on disk. Assuming you have the
 following folder structure:
 
 ```
@@ -97,7 +97,7 @@ Using format specifiers, you can parse names that are not possible otherwise.
 ### Example
 
 ```python
-from filefinder import FileFinder
+from filefisher import FileFinder
 
 paths = ["a1_abc", "ab200_abcdef",]
 
@@ -167,7 +167,7 @@ which yields:
 We can now apply a `priority_filter` as follows:
 
 ```python
-from filefinder.filters import priority_filter
+from filefisher.filters import priority_filter
 
 files = priority_filter(files, "time_res", ["1d", "6h", "1h"])
 files

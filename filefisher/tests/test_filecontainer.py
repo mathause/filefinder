@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from filefinder import FileContainer
+from filefisher import FileContainer
 
 from . import assert_filecontainer_empty
 

@@ -1,7 +1,7 @@
 import pandas as pd
 
-from filefinder import FileContainer
-from filefinder.cmip import create_ensnumber, ensure_unique_grid, parse_ens
+from filefisher import FileContainer
+from filefisher.cmip import create_ensnumber, ensure_unique_grid, parse_ens
 
 
 def test_parse_ens_cmip5():

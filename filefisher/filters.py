@@ -8,7 +8,7 @@ def _wrap_filecontainer(func):
     @functools.wraps(func)
     def _inner(*args, **kwargs):
 
-        from filefinder import FileContainer
+        from filefisher import FileContainer
 
         obj, *args = args
 

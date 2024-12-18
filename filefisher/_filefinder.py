@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import parse
 
-from filefinder._utils import (
+from filefisher._utils import (
     _find_keys,
     natural_keys,
     product_dict,

@@ -4,23 +4,23 @@ import textwrap
 import pandas as pd
 import pytest
 
-from filefinder import FileFinder
-from filefinder._filefinder import _assert_unique
+from filefisher import FileFinder
+from filefisher._filefinder import _assert_unique
 
 from . import assert_filecontainer_empty
 
 
 @pytest.fixture(scope="module")
 def tmp_path(tmp_path_factory):
-    return tmp_path_factory.mktemp("filefinder")
+    return tmp_path_factory.mktemp("filefisher")
 
 
 @pytest.fixture(scope="module", autouse=True)
 def path(tmp_path):
     """
     Creates the following temporary structure:
-    - /tmp/filefinder/a1/foo/file
-    - /tmp/filefinder/a2/foo/file
+    - /tmp/filefisher/a1/foo/file
+    - /tmp/filefisher/a2/foo/file
     """
 
     d = tmp_path / "a1" / "foo"

@@ -4,7 +4,7 @@ from typing import Iterable
 
 import pandas as pd
 
-from filefinder import FileContainer
+from filefisher import FileContainer
 
 
 @contextmanager

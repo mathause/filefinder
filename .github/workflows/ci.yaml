@@ -57,7 +57,7 @@ jobs:
 
     - name: Test with pytest
       run: python -m pytest
-        --cov=filefinder
+        --cov=filefisher
         --cov-report=xml
         --junitxml=test-results/${{ runner.os }}-${{ matrix.python-version }}.xml
 
@@ -91,4 +91,4 @@ jobs:
         python -m pip install pytest -e .
     - name: Test with pytest
       run: |
-        python -m pytest --doctest-modules filefinder --ignore filefinder/tests
+        python -m pytest --doctest-modules filefisher --ignore filefisher/tests

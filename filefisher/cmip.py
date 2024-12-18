@@ -1,7 +1,7 @@
 import pandas as pd
 import parse
 
-from filefinder.filters import priority_filter
+from filefisher.filters import priority_filter
 
 # select preferred grid; order indicates priority
 VALID_GRIDS = ("gn", "gr", "gr1", "gm")

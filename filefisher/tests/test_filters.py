@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from filefinder import FileContainer
-from filefinder.filters import priority_filter
+from filefisher import FileContainer
+from filefisher.filters import priority_filter
 
 from . import assert_no_warnings
 
